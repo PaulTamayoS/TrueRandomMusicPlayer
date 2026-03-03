@@ -6,14 +6,18 @@ import android.content.Intent;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
-import androidx.media.app.NotificationCompat;
-import androidx.media.session.MediaButtonReceiver;
 
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 
+import java.util.List;
+
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import androidx.media.session.MediaButtonReceiver;
 
 public class MusicService extends Service {
+
+    private static final int NOTIFICATION_ID = 1;
 
     private PlayerManager playerManager;
     private MediaSessionCompat mediaSession;
@@ -25,24 +29,28 @@ public class MusicService extends Service {
         super.onCreate();
 
         playerManager = new PlayerManager(this);
-        mediaSession = new MediaSessionCompat(this, "MusicService");
+        mediaSession = new MediaSessionCompat(this, "TrueRandomMusicPlayer");
+        mediaSession.setActive(true);
+
         notificationHelper = new NotificationHelper(this, mediaSession);
+
         audioFocusManager = new AudioFocusManager(this, new AudioFocusManager.AudioFocusCallback() {
             @Override
             public void onPlay() {
                 if (audioFocusManager.requestFocus()) {
                     playerManager.play();
+                    updateState();
                 }
             }
 
             @Override
             public void onPause() {
                 playerManager.pause();
+                updateState();
             }
 
             @Override
             public void onStop() {
-                playerManager.pause();
                 stopSelf();
             }
 
@@ -57,9 +65,75 @@ public class MusicService extends Service {
             }
         });
 
-        playerManager.setPlaylist(TrackRepository.getTracks(this));
+        mediaSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public void onPlay() {
+                audioFocusManager.requestFocus();
+                playerManager.play();
+                updateState();
+            }
 
-        startForeground(1, notificationHelper.buildNotification());
+            @Override
+            public void onPause() {
+                playerManager.pause();
+                updateState();
+            }
+
+            @Override
+            public void onSkipToNext() {
+                playerManager.next();
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                playerManager.previous();
+            }
+
+            @Override
+            public void onStop() {
+                stopSelf();
+            }
+        });
+
+        List<android.net.Uri> tracks = TrackRepository.getTracks(this);
+        if (tracks.isEmpty()) {
+            stopSelf();
+            return;
+        }
+
+        playerManager.setPlaylist(tracks);
+        playerManager.play();
+
+        startForeground(NOTIFICATION_ID,
+                notificationHelper.buildNotification(true));
+    }
+
+    private void updateState() {
+
+        boolean isPlaying = playerManager.isPlaying();
+
+        PlaybackStateCompat state = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackStateCompat.ACTION_PLAY |
+                                PlaybackStateCompat.ACTION_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                )
+                .setState(
+                        isPlaying ?
+                                PlaybackStateCompat.STATE_PLAYING :
+                                PlaybackStateCompat.STATE_PAUSED,
+                        playerManager.getCurrentPosition(),
+                        1f
+                )
+                .build();
+
+        mediaSession.setPlaybackState(state);
+
+        Notification notification =
+                notificationHelper.buildNotification(isPlaying);
+
+        startForeground(NOTIFICATION_ID, notification);
     }
 
     @Override

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TrueRandomMusicPlayer</string>
+    <string name="pick_music">Pick Music</string>
 </resources>

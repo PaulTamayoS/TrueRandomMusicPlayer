@@ -8,11 +8,15 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 import androidx.media.app.NotificationCompat.MediaStyle;
+
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import androidx.media.session.MediaButtonReceiver;
 
 public class NotificationHelper {
 
     private static final String CHANNEL_ID = "music_channel";
+
     private final Context context;
     private final MediaSessionCompat mediaSession;
 
@@ -34,15 +38,48 @@ public class NotificationHelper {
         }
     }
 
-    public Notification buildNotification() {
+    public Notification buildNotification(boolean isPlaying) {
+
+        int playPauseIcon = isPlaying ?
+                android.R.drawable.ic_media_pause :
+                android.R.drawable.ic_media_play;
+
+        long playPauseAction = isPlaying ?
+                PlaybackStateCompat.ACTION_PAUSE :
+                PlaybackStateCompat.ACTION_PLAY;
 
         return new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("Playing music")
+                .setContentTitle("True Random Music Player")
                 .setSmallIcon(android.R.drawable.ic_media_play)
+                .addAction(
+                        android.R.drawable.ic_media_previous,
+                        "Previous",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                context,
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                        )
+                )
+                .addAction(
+                        playPauseIcon,
+                        "PlayPause",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                context,
+                                playPauseAction
+                        )
+                )
+                .addAction(
+                        android.R.drawable.ic_media_next,
+                        "Next",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                context,
+                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                        )
+                )
                 .setStyle(new MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
-                        .setShowActionsInCompactView(0))
-                .setOngoing(true)
+                        .setShowActionsInCompactView(0,1,2)
+                )
+                .setOngoing(isPlaying)
                 .build();
     }
 }

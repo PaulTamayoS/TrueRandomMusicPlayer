@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+
+    <!-- Primary -->
+    <color name="md_theme_primary">#D0BCFF</color>
+    <color name="md_theme_onPrimary">#381E72</color>
+    <color name="md_theme_primaryContainer">#4F378B</color>
+    <color name="md_theme_onPrimaryContainer">#EADDFF</color>
+
+    <!-- Secondary -->
+    <color name="md_theme_secondary">#CCC2DC</color>
+    <color name="md_theme_onSecondary">#332D41</color>
+    <color name="md_theme_secondaryContainer">#4A4458</color>
+    <color name="md_theme_onSecondaryContainer">#E8DEF8</color>
+
+    <!-- Background / Surface -->
+    <color name="md_theme_background">#1C1B1F</color>
+    <color name="md_theme_onBackground">#E6E1E5</color>
+    <color name="md_theme_surface">#1C1B1F</color>
+    <color name="md_theme_onSurface">#E6E1E5</color>
+
+    <!-- Error -->
+    <color name="md_theme_error">#F2B8B5</color>
+    <color name="md_theme_onError">#601410</color>
+
+    <!-- Neutral / Outline -->
+    <color name="md_theme_outline">#938F99</color>
+
+    <!-- Notification Accent -->
+    <color name="notification_color">#D0BCFF</color>
+
+</resources>

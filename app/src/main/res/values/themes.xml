@@ -1,9 +1,32 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.TrueRandomMusicPlayer" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <!-- Status & navigation bar styling -->
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:navigationBarColor">?attr/colorSurface</item>
+
+        <!-- Make status bar icons adapt to theme -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">?attr/isLightTheme</item>
+
+        <!-- Optional: remove default action bar shadow -->
+        <item name="android:windowContentTransitions">true</item>
+
+
+
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
+
+        <item name="colorSecondary">@color/md_theme_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_onSecondary</item>
+
+        <item name="android:colorBackground">@color/md_theme_background</item>
+        <item name="colorSurface">@color/md_theme_surface</item>
+        <item name="colorOnSurface">@color/md_theme_onSurface</item>
+
+        <item name="colorError">@color/md_theme_error</item>
+
     </style>
 
-    <style name="Theme.TrueRandomMusicPlayer" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.TrueRandomMusicPlayer" parent="Base.Theme.TrueRandomMusicPlayer" />
 </resources>

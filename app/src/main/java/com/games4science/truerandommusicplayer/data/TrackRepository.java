@@ -22,8 +22,7 @@ public class TrackRepository {
         );
 
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        Set<String> set = prefs.getStringSet(KEY_URIS, new HashSet<>());
-        set = new HashSet<>(set);
+        Set<String> set = new HashSet<>(prefs.getStringSet(KEY_URIS, new HashSet<>()));
         set.add(uri.toString());
         prefs.edit().putStringSet(KEY_URIS, set).apply();
     }

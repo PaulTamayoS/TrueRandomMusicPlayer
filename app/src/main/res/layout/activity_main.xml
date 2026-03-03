@@ -1,18 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="?attr/android:colorBackground"
+    tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btnPickMusic"
+    <!-- App Title -->
+    <TextView
+        android:id="@+id/tvAppTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pick Music"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:text="@string/app_name"
+        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+        android:textColor="?attr/colorOnBackground"
+        android:layout_marginBottom="48dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Pick Music Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPickMusic"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="?attr/colorPrimary"
+        android:icon="@android:drawable/stat_sys_upload"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="12dp"
+        android:text="@string/pick_music"
+        android:textColor="?attr/colorOnPrimary" />
+
+    <!-- Optional: Status / instructions -->
+    <TextView
+        android:id="@+id/tvInstructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select one or more audio files to start playing"
+        android:textColor="?attr/colorOnBackground"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:layout_marginTop="24dp"
+        android:gravity="center"/>
+
+</LinearLayout>
