@@ -19,6 +19,12 @@ public class MusicService extends Service {
 
     private static final int NOTIFICATION_ID = 1;
 
+    public static final String ACTION_PLAY = "ACTION_PLAY";
+    public static final String ACTION_PAUSE = "ACTION_PAUSE";
+    public static final String ACTION_NEXT = "ACTION_NEXT";
+    public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
+    public static final String ACTION_STOP = "ACTION_STOP";
+
     private PlayerManager playerManager;
     private MediaSessionCompat mediaSession;
     private NotificationHelper notificationHelper;
@@ -136,9 +142,41 @@ public class MusicService extends Service {
         startForeground(NOTIFICATION_ID, notification);
     }
 
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//        MediaButtonReceiver.handleIntent(mediaSession, intent);
+//        return START_STICKY;
+//    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        MediaButtonReceiver.handleIntent(mediaSession, intent);
+
+        if (intent != null && intent.getAction() != null) {
+
+            switch (intent.getAction()) {
+
+                case ACTION_PLAY:
+                    playerManager.play();
+                    break;
+
+                case ACTION_PAUSE:
+                    playerManager.pause();
+                    break;
+
+                case ACTION_NEXT:
+                    playerManager.next();
+                    break;
+
+                case ACTION_PREVIOUS:
+                    playerManager.previous();
+                    break;
+
+                case ACTION_STOP:
+                    stopSelf();
+                    break;
+            }
+        }
+
         return START_STICKY;
     }
 

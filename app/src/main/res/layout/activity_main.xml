@@ -44,6 +44,44 @@
         android:textColor="?attr/colorOnBackground"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:layout_marginTop="24dp"
+        android:layout_marginBottom="12dp"
         android:gravity="center"/>
 
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPrevious"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Prev"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Play"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Pause"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Next"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Stop"/>
+
 </LinearLayout>
+

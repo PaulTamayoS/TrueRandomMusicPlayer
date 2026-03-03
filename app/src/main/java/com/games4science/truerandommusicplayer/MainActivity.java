@@ -31,6 +31,16 @@ public class MainActivity extends AppCompatActivity {
         requestNotificationPermission();
 
         binding.btnPickMusic.setOnClickListener(v -> openPicker());
+
+        binding.btnPlay.setOnClickListener(v -> sendCommand(MusicService.ACTION_PLAY));
+
+        binding.btnPause.setOnClickListener(v -> sendCommand(MusicService.ACTION_PAUSE));
+
+        binding.btnNext.setOnClickListener(v -> sendCommand(MusicService.ACTION_NEXT));
+
+        binding.btnPrevious.setOnClickListener(v -> sendCommand(MusicService.ACTION_PREVIOUS));
+
+        binding.btnStop.setOnClickListener(v -> sendCommand(MusicService.ACTION_STOP));
     }
 
     private void openPicker() {
@@ -38,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
         intent.setType("audio/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         openPickerLauncher.launch(intent);
+    }
+
+    private void sendCommand(String action) {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.setAction(action);
+        ContextCompat.startForegroundService(this, intent);
     }
 
     private final ActivityResultLauncher<Intent> openPickerLauncher =
