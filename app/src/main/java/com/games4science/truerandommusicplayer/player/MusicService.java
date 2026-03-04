@@ -1,196 +1,76 @@
 package com.games4science.truerandommusicplayer.player;
 
-import android.app.Notification;
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.session.MediaSession;
+import androidx.media3.session.MediaSessionService;
+import androidx.media3.session.MediaSession.ControllerInfo;
 
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 
+import java.util.Collections;
 import java.util.List;
 
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.media.session.MediaButtonReceiver;
+public class MusicService extends MediaSessionService {
 
-public class MusicService extends Service {
-
-    private static final int NOTIFICATION_ID = 1;
-
-    public static final String ACTION_PLAY = "ACTION_PLAY";
-    public static final String ACTION_PAUSE = "ACTION_PAUSE";
-    public static final String ACTION_NEXT = "ACTION_NEXT";
-    public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
-    public static final String ACTION_STOP = "ACTION_STOP";
-
-    private PlayerManager playerManager;
-    private MediaSessionCompat mediaSession;
-    private NotificationHelper notificationHelper;
-    private AudioFocusManager audioFocusManager;
+    private ExoPlayer player;
+    private MediaSession mediaSession;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        playerManager = new PlayerManager(this);
-        mediaSession = new MediaSessionCompat(this, "TrueRandomMusicPlayer");
-        mediaSession.setActive(true);
+        // Create ExoPlayer
+        player = new ExoPlayer.Builder(this).build();
 
-        notificationHelper = new NotificationHelper(this, mediaSession);
+        // Load saved tracks
+        List<Uri> tracks = TrackRepository.getTracks(this);
 
-        audioFocusManager = new AudioFocusManager(this, new AudioFocusManager.AudioFocusCallback() {
-            @Override
-            public void onPlay() {
-                if (audioFocusManager.requestFocus()) {
-                    playerManager.play();
-                    updateState();
-                }
-            }
-
-            @Override
-            public void onPause() {
-                playerManager.pause();
-                updateState();
-            }
-
-            @Override
-            public void onStop() {
-                stopSelf();
-            }
-
-            @Override
-            public void onDuck() {
-                playerManager.getPlayer().setVolume(0.3f);
-            }
-
-            @Override
-            public void onUnduck() {
-                playerManager.getPlayer().setVolume(1.0f);
-            }
-        });
-
-        mediaSession.setCallback(new MediaSessionCompat.Callback() {
-            @Override
-            public void onPlay() {
-                audioFocusManager.requestFocus();
-                playerManager.play();
-                updateState();
-            }
-
-            @Override
-            public void onPause() {
-                playerManager.pause();
-                updateState();
-            }
-
-            @Override
-            public void onSkipToNext() {
-                playerManager.next();
-            }
-
-            @Override
-            public void onSkipToPrevious() {
-                playerManager.previous();
-            }
-
-            @Override
-            public void onStop() {
-                stopSelf();
-            }
-        });
-
-        List<android.net.Uri> tracks = TrackRepository.getTracks(this);
-        if (tracks.isEmpty()) {
-            stopSelf();
-            return;
+        //Set Playlist
+        for (Uri uri : tracks) {
+            player.clearMediaItems();
+            Collections.shuffle(tracks); // TRUE RANDOM
+            MediaItem mediaItem = new MediaItem.Builder()
+                    .setUri(uri)
+                    .build();
+            player.addMediaItem(mediaItem);
         }
 
-        playerManager.setPlaylist(tracks);
-        playerManager.play();
+        player.prepare();
 
-        startForeground(NOTIFICATION_ID,
-                notificationHelper.buildNotification(true));
-    }
-
-    private void updateState() {
-
-        boolean isPlaying = playerManager.isPlaying();
-
-        PlaybackStateCompat state = new PlaybackStateCompat.Builder()
-                .setActions(
-                        PlaybackStateCompat.ACTION_PLAY |
-                                PlaybackStateCompat.ACTION_PAUSE |
-                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                )
-                .setState(
-                        isPlaying ?
-                                PlaybackStateCompat.STATE_PLAYING :
-                                PlaybackStateCompat.STATE_PAUSED,
-                        playerManager.getCurrentPosition(),
-                        1f
-                )
+        // Create MediaSession and attach player
+        mediaSession = new MediaSession.Builder(this, player)
                 .build();
 
-        mediaSession.setPlaybackState(state);
-
-        Notification notification =
-                notificationHelper.buildNotification(isPlaying);
-
-        startForeground(NOTIFICATION_ID, notification);
-    }
-
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        MediaButtonReceiver.handleIntent(mediaSession, intent);
-//        return START_STICKY;
-//    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-
-        if (intent != null && intent.getAction() != null) {
-
-            switch (intent.getAction()) {
-
-                case ACTION_PLAY:
-                    playerManager.play();
-                    break;
-
-                case ACTION_PAUSE:
-                    playerManager.pause();
-                    break;
-
-                case ACTION_NEXT:
-                    playerManager.next();
-                    break;
-
-                case ACTION_PREVIOUS:
-                    playerManager.previous();
-                    break;
-
-                case ACTION_STOP:
-                    stopSelf();
-                    break;
-            }
+        // Optional: auto play when service starts
+        if (!tracks.isEmpty()) {
+            player.play();
         }
-
-        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        playerManager.release();
-        mediaSession.release();
-        audioFocusManager.abandonFocus();
+        if (mediaSession != null) {
+            mediaSession.release();
+            mediaSession = null;
+        }
+
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+
         super.onDestroy();
     }
 
     @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public MediaSession onGetSession(@NonNull ControllerInfo controllerInfo) {
+        return mediaSession;
     }
 }
