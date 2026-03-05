@@ -36,4 +36,9 @@ public class TrackRepository {
         }
         return list;
     }
+
+    public static void clearTracks(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_URIS).apply();
+    }
 }
