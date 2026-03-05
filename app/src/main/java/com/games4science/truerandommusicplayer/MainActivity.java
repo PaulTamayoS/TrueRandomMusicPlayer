@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private static final int REQUEST_NOTIF = 100;
 
-    private MediaController mediaController;
+    private MediaController controller;
     private ListenableFuture<MediaController> controllerFuture;
 
     @Override
@@ -40,50 +40,54 @@ public class MainActivity extends AppCompatActivity {
 
         requestNotificationPermission();
 
-        initializeController();
+        connectToService();
 
-        binding.btnPickMusic.setOnClickListener(v -> openPicker());
+        binding.btnAddMusic.setOnClickListener(v -> openPicker());
+
+        binding.btnClear.setOnClickListener(v -> {
+            TrackRepository.clearTracks(this);
+            Intent intent = new Intent(this, MusicService.class);
+            intent.setAction("LOAD_PLAYLIST");
+            ContextCompat.startForegroundService(this, intent);
+        });
 
         binding.btnPlay.setOnClickListener(v -> {
-            if (mediaController != null) {
-                mediaController.play();
-            }
+            if (controller  != null) controller.play();
         });
 
         binding.btnPause.setOnClickListener(v -> {
-            if (mediaController != null) {
-                mediaController.pause();
-            }
+            if (controller != null) controller.pause();
         });
 
         binding.btnNext.setOnClickListener(v -> {
-            if (mediaController != null) {
-                mediaController.seekToNextMediaItem();
-            }
+            if (controller != null) controller.seekToNextMediaItem();
         });
 
         binding.btnPrevious.setOnClickListener(v -> {
-            if (mediaController != null) {
-                mediaController.seekToPreviousMediaItem();
+            if (controller != null) controller.seekToPreviousMediaItem();
+        });
+
+        binding.btnStop.setOnClickListener(v -> {
+            if (controller != null)
+            {
+                controller.stop();
+                controller.seekTo(0);
             }
         });
     }
 
-    private void initializeController() {
+    private void connectToService() {
+        SessionToken sessionToken = new SessionToken(
+                this,
+                new ComponentName(this, MusicService.class)
+        );
 
-        SessionToken sessionToken =
-                new SessionToken(
-                        this,
-                        new ComponentName(this, MusicService.class)
-                );
-
-        controllerFuture =
-                new MediaController.Builder(this, sessionToken).buildAsync();
+        controllerFuture = new MediaController.Builder(this, sessionToken).buildAsync();
 
         controllerFuture.addListener(() -> {
             try {
-                mediaController = controllerFuture.get();
-            } catch (ExecutionException | InterruptedException e) {
+                controller = controllerFuture.get();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
@@ -104,26 +108,33 @@ public class MainActivity extends AppCompatActivity {
 
                             Intent data = result.getData();
                             boolean addedAny = false;
+                            int countAddedTracks = 0;
 
-                            if (data.getData() != null) {
+                            if (data.getData() != null)
+                            {
                                 TrackRepository.saveTrack(this, data.getData());
                                 addedAny = true;
-                            } else if (data.getClipData() != null) {
-                                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                                countAddedTracks++;
+                            }
+                            else if (data.getClipData() != null)
+                            {
+                                for (int i = 0; i < data.getClipData().getItemCount(); i++)
+                                {
                                     Uri uri = data.getClipData().getItemAt(i).getUri();
                                     TrackRepository.saveTrack(this, uri);
                                     addedAny = true;
+                                    countAddedTracks++;
                                 }
                             }
 
                             if (addedAny) {
-                                Toast.makeText(this, "Tracks added!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
 
                                 // Start the MediaSessionService
-                                ContextCompat.startForegroundService(
-                                        this,
-                                        new Intent(this, MusicService.class)
-                                );
+                                Intent serviceIntent = new Intent(this, MusicService.class);
+                                serviceIntent.setAction("LOAD_PLAYLIST");
+
+                                ContextCompat.startForegroundService(this, serviceIntent);
                             }
                         }
                     }
@@ -156,9 +167,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mediaController != null) {
-            mediaController.release();
-            mediaController = null;
+        if (controller != null) {
+            controller.release();
+            controller = null;
         }
     }
 }

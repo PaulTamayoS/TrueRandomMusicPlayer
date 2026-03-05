@@ -24,7 +24,7 @@
 
     <!-- Pick Music Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnPickMusic"
+        android:id="@+id/btnAddMusic"
         style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,8 +32,15 @@
         android:icon="@android:drawable/stat_sys_upload"
         android:paddingHorizontal="24dp"
         android:paddingVertical="12dp"
-        android:text="@string/pick_music"
+        android:layout_marginBottom="5dp"
+        android:text="@string/add_songs_to_library"
         android:textColor="?attr/colorOnPrimary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/clear_library"/>
 
     <!-- Optional: Status / instructions -->
     <TextView
@@ -80,8 +87,7 @@
         android:id="@+id/btnStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:text="Stop"/>
+        android:text="@string/stop"/>
 
 </LinearLayout>
 

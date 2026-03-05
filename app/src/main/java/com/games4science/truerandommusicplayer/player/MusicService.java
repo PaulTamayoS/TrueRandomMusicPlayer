@@ -1,11 +1,11 @@
 package com.games4science.truerandommusicplayer.player;
 
+import android.content.Intent;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.MediaItem;
-import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
@@ -24,53 +24,52 @@ public class MusicService extends MediaSessionService {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        // Create ExoPlayer
         player = new ExoPlayer.Builder(this).build();
+        mediaSession = new MediaSession.Builder(this, player).build();
+    }
 
-        // Load saved tracks
+    private void loadPlaylist() {
         List<Uri> tracks = TrackRepository.getTracks(this);
 
-        //Set Playlist
+        player.clearMediaItems();
+        Collections.shuffle(tracks); // TRUE RANDOM
+
         for (Uri uri : tracks) {
-            player.clearMediaItems();
-            Collections.shuffle(tracks); // TRUE RANDOM
-            MediaItem mediaItem = new MediaItem.Builder()
-                    .setUri(uri)
-                    .build();
-            player.addMediaItem(mediaItem);
+            player.addMediaItem(MediaItem.fromUri(uri));
         }
 
         player.prepare();
 
-        // Create MediaSession and attach player
-        mediaSession = new MediaSession.Builder(this, player)
-                .build();
-
-        // Optional: auto play when service starts
         if (!tracks.isEmpty()) {
             player.play();
         }
     }
 
     @Override
-    public void onDestroy() {
-        if (mediaSession != null) {
-            mediaSession.release();
-            mediaSession = null;
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && "LOAD_PLAYLIST".equals(intent.getAction())) {
+            loadPlaylist();
         }
 
-        if (player != null) {
-            player.release();
-            player = null;
-        }
-
-        super.onDestroy();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
     @Override
     public MediaSession onGetSession(@NonNull ControllerInfo controllerInfo) {
         return mediaSession;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mediaSession != null) {
+            mediaSession.release();
+        }
+
+        if (player != null) {
+            player.release();
+        }
+
+        super.onDestroy();
     }
 }
