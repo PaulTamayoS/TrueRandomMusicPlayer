@@ -77,10 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectToService() {
-        SessionToken sessionToken = new SessionToken(
-                this,
-                new ComponentName(this, MusicService.class)
-        );
+        SessionToken sessionToken = new SessionToken(this, new ComponentName(this, MusicService.class));
 
         controllerFuture = new MediaController.Builder(this, sessionToken).buildAsync();
 
