@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,9 +20,12 @@ import androidx.media3.session.SessionToken;
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
+import com.games4science.truerandommusicplayer.util.MyUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.concurrent.ExecutionException;
+import android.os.Handler;
+import android.os.Looper;
+import androidx.media3.common.MediaItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaController controller;
     private ListenableFuture<MediaController> controllerFuture;
+
+    private Handler progressHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.btnPlay.setOnClickListener(v -> {
-            if (controller  != null) controller.play();
+            if (controller  != null)
+            {
+                controller.play();
+            }
         });
 
         binding.btnPause.setOnClickListener(v -> {
@@ -74,6 +83,26 @@ public class MainActivity extends AppCompatActivity {
                 controller.seekTo(0);
             }
         });
+
+        binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                if (fromUser && controller != null) {
+
+                    long duration = controller.getDuration();
+                    long newPosition = (duration * progress) / 1000;
+
+                    controller.seekTo(newPosition);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     private void connectToService() {
@@ -84,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         controllerFuture.addListener(() -> {
             try {
                 controller = controllerFuture.get();
+                progressHandler.post(progressRunnable);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -164,9 +194,44 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
+        progressHandler.removeCallbacks(progressRunnable);
+
         if (controller != null) {
             controller.release();
             controller = null;
         }
     }
+
+    private final Runnable progressRunnable = new Runnable() {
+        @Override
+        public void run() {
+
+            if (controller != null && controller.isConnected()) {
+
+                long position = controller.getCurrentPosition();
+                long duration = controller.getDuration();
+
+                if (duration > 0) {
+
+                    int progress = (int) ((position * 1000) / duration);
+                    binding.seekBar.setProgress(progress);
+
+                    binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
+                }
+
+                MediaItem item = controller.getCurrentMediaItem();
+
+                if (item != null && item.mediaMetadata != null && item.mediaMetadata.title != null) {
+                    binding.txtTrackTitle.setText(item.mediaMetadata.title.toString());
+                }
+            }
+
+            progressHandler.postDelayed(this, 500);
+        }
+    };
+
+    //region UI Listeners
+
+    //endregion
+
 }
