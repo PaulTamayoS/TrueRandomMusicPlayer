@@ -49,61 +49,14 @@ public class MainActivity extends AppCompatActivity {
         connectToService();
 
         binding.btnAddMusic.setOnClickListener(v -> openPicker());
-
-        binding.btnClear.setOnClickListener(v -> {
-            TrackRepository.clearTracks(this);
-            Intent intent = new Intent(this, MusicService.class);
-            intent.setAction("LOAD_PLAYLIST");
-            ContextCompat.startForegroundService(this, intent);
-        });
-
-        binding.btnPlay.setOnClickListener(v -> {
-            if (controller  != null)
-            {
-                controller.play();
-            }
-        });
-
-        binding.btnPause.setOnClickListener(v -> {
-            if (controller != null) controller.pause();
-        });
-
-        binding.btnNext.setOnClickListener(v -> {
-            if (controller != null) controller.seekToNextMediaItem();
-        });
-
-        binding.btnPrevious.setOnClickListener(v -> {
-            if (controller != null) controller.seekToPreviousMediaItem();
-        });
-
-        binding.btnStop.setOnClickListener(v -> {
-            if (controller != null)
-            {
-                controller.stop();
-                controller.seekTo(0);
-            }
-        });
-
-        binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                if (fromUser && controller != null) {
-
-                    long duration = controller.getDuration();
-                    long newPosition = (duration * progress) / 1000;
-
-                    controller.seekTo(newPosition);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-    }
+        binding.btnClear.setOnClickListener(v ->  OnClickBtnClear());
+        binding.btnPlay.setOnClickListener(v -> OnClickBtnPlay());
+        binding.btnPause.setOnClickListener(v -> OnClickBtnPause());
+        binding.btnNext.setOnClickListener(v -> OnClickBtnNext());
+        binding.btnPrevious.setOnClickListener(v -> OnClickBtnPrevious());
+        binding.btnStop.setOnClickListener(v -> OnClickBtnStop());
+        binding.seekBar.setOnSeekBarChangeListener(CreateSeekBarListener());
+   }
 
     private void connectToService() {
         SessionToken sessionToken = new SessionToken(this, new ComponentName(this, MusicService.class));
@@ -120,12 +73,7 @@ public class MainActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    private void openPicker() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("audio/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        openPickerLauncher.launch(intent);
-    }
+
 
     private final ActivityResultLauncher<Intent> openPickerLauncher =
             registerForActivityResult(
@@ -232,6 +180,69 @@ public class MainActivity extends AppCompatActivity {
 
     //region UI Listeners
 
-    //endregion
+    private void openPicker() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("audio/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        openPickerLauncher.launch(intent);
+    }
 
+    private void OnClickBtnClear() {
+        TrackRepository.clearTracks(this);
+        Intent intent = new Intent(this, MusicService.class);
+        intent.setAction("LOAD_PLAYLIST");
+        ContextCompat.startForegroundService(this, intent);
+    }
+
+    private void OnClickBtnPlay() {
+        if (controller != null) {
+            controller.play();
+        }
+    }
+
+    private void OnClickBtnPause() {
+        if (controller != null) {
+            controller.pause();
+        }
+    }
+
+    private void OnClickBtnNext() {
+        if (controller != null) {
+            controller.seekToNextMediaItem();
+        }
+    }
+
+    private void OnClickBtnPrevious(){
+        if (controller != null) {
+            controller.seekToPreviousMediaItem();
+        }
+    }
+
+    private void OnClickBtnStop() {
+        if (controller != null) {
+            controller.stop();
+            controller.seekTo(0);
+        }
+    }
+
+    private SeekBar.OnSeekBarChangeListener CreateSeekBarListener() {
+        return new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && controller != null) {
+                    long duration = controller.getDuration();
+                    long newPosition = (duration * progress) / 1000;
+                    controller.seekTo(newPosition);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
+    }
+
+    //endregion
 }
