@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 
@@ -36,9 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ListenableFuture<MediaController> controllerFuture;
 
     private Handler progressHandler = new Handler(Looper.getMainLooper());
-
     private boolean isUserInteractingWithSeekingBar = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding.btnAddMusic.setOnClickListener(v -> openPicker());
         binding.btnClear.setOnClickListener(v ->  OnClickBtnClear());
-        binding.btnPlay.setOnClickListener(v -> OnClickBtnPlay());
-        binding.btnPause.setOnClickListener(v -> OnClickBtnPause());
+        binding.btnPlayPause.setOnClickListener(v -> OnClickBtnPlayPause());
         binding.btnNext.setOnClickListener(v -> OnClickBtnNext());
         binding.btnPrevious.setOnClickListener(v -> OnClickBtnPrevious());
         binding.btnStop.setOnClickListener(v -> OnClickBtnStop());
@@ -63,20 +61,38 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectToService() {
         SessionToken sessionToken = new SessionToken(this, new ComponentName(this, MusicService.class));
-
         controllerFuture = new MediaController.Builder(this, sessionToken).buildAsync();
 
         controllerFuture.addListener(() -> {
             try {
                 controller = controllerFuture.get();
+
+                // Add Listener to handle icon changes automatically
+                controller.addListener(new Player.Listener() {
+                    @Override
+                    public void onIsPlayingChanged(boolean isPlaying) {
+                        updatePlayPauseIcon(isPlaying);
+                    }
+                });
+
+                // Set initial icon state
+                updatePlayPauseIcon(controller.isPlaying());
+
                 progressHandler.post(progressRunnable);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
     }
 
-
+    private void updatePlayPauseIcon(boolean isPlaying) {
+        if (isPlaying) {
+            binding.btnPlayPause.setIconResource(android.R.drawable.ic_media_pause);
+        } else {
+            binding.btnPlayPause.setIconResource(android.R.drawable.ic_media_play);
+        }
+    }
 
     private final ActivityResultLauncher<Intent> openPickerLauncher =
             registerForActivityResult(
@@ -134,9 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_NOTIF) {
             if (grantResults.length > 0 && grantResults[0] != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this,
-                        "Notification permission denied. Playback notification may not appear.",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(this,"Notification permission denied. Playback notification may not appear.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -156,20 +170,15 @@ public class MainActivity extends AppCompatActivity {
     private final Runnable progressRunnable = new Runnable() {
         @Override
         public void run() {
-
             if (controller != null && controller.isConnected()) {
-
                 long position = controller.getCurrentPosition();
                 long duration = controller.getDuration();
 
                 if (duration > 0) {
-
                     int progress = (int) ((position * 1000) / duration);
-
                     if (isUserInteractingWithSeekingBar == false) { // Only update if the user IS NOT touching the bar
                         binding.seekBar.setProgress(progress);
                     }
-
                     binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
                 }
 
@@ -200,15 +209,13 @@ public class MainActivity extends AppCompatActivity {
         ContextCompat.startForegroundService(this, intent);
     }
 
-    private void OnClickBtnPlay() {
+    private void OnClickBtnPlayPause() {
         if (controller != null) {
-            controller.play();
-        }
-    }
-
-    private void OnClickBtnPause() {
-        if (controller != null) {
-            controller.pause();
+            if (controller.isPlaying()) {
+                controller.pause();
+            } else {
+                controller.play();
+            }
         }
     }
 
@@ -228,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
         if (controller != null) {
             controller.stop();
             controller.seekTo(0);
+            updatePlayPauseIcon(false); // After stop, ensure icon is set to Play
         }
     }
 
