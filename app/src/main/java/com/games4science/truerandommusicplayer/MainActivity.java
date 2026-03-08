@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler progressHandler = new Handler(Looper.getMainLooper());
 
+    private boolean isUserInteractingWithSeekingBar = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,7 +165,10 @@ public class MainActivity extends AppCompatActivity {
                 if (duration > 0) {
 
                     int progress = (int) ((position * 1000) / duration);
-                    binding.seekBar.setProgress(progress);
+
+                    if (isUserInteractingWithSeekingBar == false) { // Only update if the user IS NOT touching the bar
+                        binding.seekBar.setProgress(progress);
+                    }
 
                     binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
                 }
@@ -237,10 +243,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isUserInteractingWithSeekingBar = true; // User started dragging
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                isUserInteractingWithSeekingBar = false; // User stopped dragging
+            }
         };
     }
 
