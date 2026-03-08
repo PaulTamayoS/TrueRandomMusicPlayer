@@ -29,13 +29,13 @@ public class MusicService extends MediaSessionService {
     }
 
     private void loadPlaylist() {
-        List<Uri> tracks = TrackRepository.getTracks(this);
+        List<MediaItem> tracks = TrackRepository.getTracks(this);
 
         player.clearMediaItems();
         Collections.shuffle(tracks); // TRUE RANDOM
 
-        for (Uri uri : tracks) {
-            player.addMediaItem(MediaItem.fromUri(uri));
+        for (MediaItem mediaItemInList : tracks) {
+            player.addMediaItem(mediaItemInList);
         }
 
         player.prepare();
