@@ -3,4 +3,8 @@
     <string name="add_songs_to_library">Add Songs to Library</string>
     <string name="clear_library">Clear Library</string>
     <string name="stop">Stop and Close Notification Popup</string>
+    <string name="previous">Previous</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="next">Next</string>
 </resources>
