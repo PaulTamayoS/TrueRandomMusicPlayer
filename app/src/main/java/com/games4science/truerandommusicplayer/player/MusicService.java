@@ -2,6 +2,7 @@ package com.games4science.truerandommusicplayer.player;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,27 +27,32 @@ public class MusicService extends MediaSessionService {
         super.onCreate();
         player = new ExoPlayer.Builder(this).build();
         mediaSession = new MediaSession.Builder(this, player).build();
+
+        loadPlaylist(); // autoresume the list
     }
 
     private void loadPlaylist() {
         List<MediaItem> tracks = TrackRepository.getTracks(this);
 
         player.clearMediaItems();
+
+        if (tracks.isEmpty()) {
+            Toast.makeText(this, "No Tracks into the current list !!!", Toast.LENGTH_SHORT).show();
+            player.stop();
+            stopSelf();
+            return;
+        }
+
         Collections.shuffle(tracks); // TRUE RANDOM
 
         for (MediaItem mediaItemInList : tracks) {
             player.addMediaItem(mediaItemInList);
         }
 
-        player.prepare();
+        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show();
 
-        if (tracks.isEmpty()) {
-            player.stop();
-            stopSelf();
-        }
-        else {
-            player.play();
-        }
+        player.prepare();
+        player.play();
     }
 
     @Override
