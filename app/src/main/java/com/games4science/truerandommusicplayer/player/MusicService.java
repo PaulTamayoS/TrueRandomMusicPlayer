@@ -37,7 +37,7 @@ public class MusicService extends MediaSessionService {
         player.clearMediaItems();
 
         if (tracks.isEmpty()) {
-            Toast.makeText(this, "No Tracks into the current list !!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No Tracks into the current list !!!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
             player.stop();
             stopSelf();
             return;
@@ -49,7 +49,7 @@ public class MusicService extends MediaSessionService {
             player.addMediaItem(mediaItemInList);
         }
 
-        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
 
         player.prepare();
         player.play();
