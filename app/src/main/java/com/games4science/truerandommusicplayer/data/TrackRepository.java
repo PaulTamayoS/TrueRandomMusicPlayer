@@ -3,8 +3,10 @@ package com.games4science.truerandommusicplayer.data;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
@@ -43,7 +45,7 @@ public class TrackRepository {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         List<MediaItem> listOutput = new ArrayList<>();
 
-        Set<String> setUris = prefs.getStringSet(KEY_URIS, new HashSet<>());
+        Set<String> setUris = new HashSet<>(prefs.getStringSet(KEY_URIS, new HashSet<>()));
 
 
         for (String s : setUris) {
@@ -63,19 +65,20 @@ public class TrackRepository {
                 artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
                 album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
 
-            } catch (RuntimeException e) {
+            }
+            catch (RuntimeException e) {
                 e.printStackTrace();
-            } finally {
+            }
+            finally {
                 try {
                     retriever.release();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
+                catch (Exception ignored) {}
             }
 
             // fallback title if metadata missing
             if (title == null) {
-                title = uri.getLastPathSegment();
+                title = getFileNameFromUri(context, uri);
             }
 
             if (artist == null) {
@@ -101,5 +104,33 @@ public class TrackRepository {
             listOutput.add(createdMediaItem);
         }
         return listOutput;
+    }
+
+    private static String getFileNameFromUri(Context context, Uri uri) {
+        String fileName = null;
+
+        // If it's a content URI (the most common for selected files)
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (nameIndex != -1) {
+                        fileName = cursor.getString(nameIndex);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // If it's a file URI or the content query failed
+        if (fileName == null) {
+            fileName = uri.getLastPathSegment();
+            if (fileName != null && fileName.contains("/")) {
+                fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+            }
+        }
+
+        return fileName != null ? fileName.replace("%20", " ") : "Unknown title";
     }
 }
