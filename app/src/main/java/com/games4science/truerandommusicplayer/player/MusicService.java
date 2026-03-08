@@ -40,7 +40,11 @@ public class MusicService extends MediaSessionService {
 
         player.prepare();
 
-        if (!tracks.isEmpty()) {
+        if (tracks.isEmpty()) {
+            player.stop();
+            stopSelf();
+        }
+        else {
             player.play();
         }
     }
