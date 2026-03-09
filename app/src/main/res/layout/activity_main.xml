@@ -37,7 +37,7 @@
         android:textColor="?attr/colorOnPrimary" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnClear"
+        android:id="@+id/btnClearLibrary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/clear_library"/>
@@ -136,6 +136,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/stop" />
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switchPureRandom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Pure Random (Dice Roll) "
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_getCenter="true" />
 
 </LinearLayout>
 

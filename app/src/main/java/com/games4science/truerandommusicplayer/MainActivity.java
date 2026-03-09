@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         connectToService();
 
         binding.btnAddMusic.setOnClickListener(v -> openPicker());
-        binding.btnClear.setOnClickListener(v ->  OnClickBtnClear());
+        binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
         binding.btnPlayPause.setOnClickListener(v -> OnClickBtnPlayPause());
         binding.btnNext.setOnClickListener(v -> OnClickBtnNext());
         binding.btnPrevious.setOnClickListener(v -> OnClickBtnPrevious());
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
         openPickerLauncher.launch(intent);
     }
 
-    private void OnClickBtnClear() {
+    private void OnClickBtnClearLibrary() {
         TrackRepository.clearTracks(this);
         Intent intent = new Intent(this, MusicService.class);
         intent.setAction("LOAD_PLAYLIST");
