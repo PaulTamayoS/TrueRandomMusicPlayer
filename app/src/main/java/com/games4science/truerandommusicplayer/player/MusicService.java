@@ -18,12 +18,28 @@ public class MusicService extends MediaSessionService {
 
     private ExoPlayer player;
     private MediaSession mediaSession;
+    private boolean isPureRandomEnabled = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
         player = new ExoPlayer.Builder(this).build();
         player.setRepeatMode(Player.REPEAT_MODE_ALL);// Loop the entire shuffled list
+
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+                // REASON_AUTO_TRANSITION means the previous song just finished
+                if (isPureRandomEnabled && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO_TRANSITION) {
+                    int totalTracks = player.getMediaItemCount();
+                    if (totalTracks > 0) {
+                        int nextRandomIndex = (int) (Math.random() * totalTracks); //TODO check better formula
+                        player.seekTo(nextRandomIndex, 0);
+                    }
+                }
+            }
+        });
+
         mediaSession = new MediaSession.Builder(this, player).build();
         loadPlaylist(false); // Load but don't force play immediately on boot
     }
@@ -39,6 +55,8 @@ public class MusicService extends MediaSessionService {
 
         Collections.shuffle(tracks); // TRUE RANDOM
 
+        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
+
         // Clear and update the player
         player.setMediaItems(tracks);
         player.prepare();
@@ -46,14 +64,19 @@ public class MusicService extends MediaSessionService {
         if (playImmediately) {
             player.play();
         }
-
-        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && "LOAD_PLAYLIST".equals(intent.getAction())) {
-            loadPlaylist(true);
+        if (intent != null) {
+            String action = intent.getAction();
+            if ("LOAD_PLAYLIST".equals(action)) {
+                loadPlaylist(true);
+            } else if ("TOGGLE_PURE_RANDOM".equals(action)) {
+                isPureRandomEnabled = intent.getBooleanExtra("STATE", false);
+                // If switching to Pure Random, we disable Repeat_ALL so our manual transition logic takes over
+                player.setRepeatMode(isPureRandomEnabled ? Player.REPEAT_MODE_OFF : Player.REPEAT_MODE_ALL);
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
