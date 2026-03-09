@@ -29,8 +29,7 @@ public class TrackRepository {
     public static void saveTrack(Context context, Uri uri) {
         context.getContentResolver().takePersistableUriPermission(
                 uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-        );
+                Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         Set<String> set = new HashSet<>(prefs.getStringSet(KEY_URIS, new HashSet<>()));
@@ -57,16 +56,12 @@ public class TrackRepository {
 
             String title = null;
             String artist = null;
-            String album = null;
 
             try {
-
                 retriever.setDataSource(context, uri);
 
                 title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
                 artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-
             }
             catch (RuntimeException e) {
                 e.printStackTrace();
@@ -87,14 +82,9 @@ public class TrackRepository {
                 artist = "No artist";
             }
 
-            if (album == null) {
-                album = "No album";
-            }
-
             MediaMetadata metadata = new MediaMetadata.Builder()
                     .setTitle(title)
                     .setArtist(artist)
-                    .setAlbumTitle(album)
                     .build();
 
             MediaItem createdMediaItem = new MediaItem.Builder()
