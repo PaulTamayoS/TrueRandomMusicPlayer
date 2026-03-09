@@ -57,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
         binding.btnPrevious.setOnClickListener(v -> OnClickBtnPrevious());
         binding.btnStop.setOnClickListener(v -> OnClickBtnStop());
         binding.seekBar.setOnSeekBarChangeListener(CreateSeekBarListener());
+
+        binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Intent intent = new Intent(this, MusicService.class);
+            intent.setAction("TOGGLE_PURE_RANDOM");
+            intent.putExtra("STATE", isChecked);
+            startService(intent);
+        });
    }
 
     private void connectToService() {
