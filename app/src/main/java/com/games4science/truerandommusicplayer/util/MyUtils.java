@@ -41,6 +41,6 @@ public class MyUtils {
             }
         }
 
-        return fileName != null ? fileName.replace("%20", " ") : "Unknown title";
+        return fileName != null ? fileName.replace("%20", " ") : "Unknown Song";
     }
 }
