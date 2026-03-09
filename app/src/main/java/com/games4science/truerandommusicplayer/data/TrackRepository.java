@@ -79,7 +79,7 @@ public class TrackRepository {
             }
 
             // fallback title if metadata missing
-            if (title == null) {
+            if (title == null || title.isEmpty()) {
                 title = MyUtils.getFileNameFromUri(context, uri);
             }
 
