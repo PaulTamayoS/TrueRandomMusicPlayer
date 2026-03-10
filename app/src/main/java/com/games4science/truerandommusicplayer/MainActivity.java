@@ -191,11 +191,15 @@ public class MainActivity extends AppCompatActivity {
 
                 MediaItem item = controller.getCurrentMediaItem();
 
-                if (item != null && item.mediaMetadata != null && item.mediaMetadata.title != null) {
-                    binding.txtTrackTitle.setText(item.mediaMetadata.title.toString());
+                if (item != null && item.mediaMetadata != null ) {
+                    String title = item.mediaMetadata.title != null ? item.mediaMetadata.title.toString() : "Unknown Song";
+
+                    // Show "Current Index / Total Tracks" for better UX
+                    int currentIdx = controller.getCurrentMediaItemIndex() + 1;
+                    int total = controller.getMediaItemCount();
+                    binding.txtTrackTitle.setText(title + " (" + currentIdx + "/" + total + ")");
                 }
             }
-
             progressHandler.postDelayed(this, 500);
         }
     };
