@@ -80,8 +80,6 @@ public class MusicService extends MediaSessionService {
                 loadPlaylist(true);
             } else if ("TOGGLE_PURE_RANDOM".equals(action)) {
                 isPureRandomEnabled = intent.getBooleanExtra("STATE", false);
-                // If switching to Pure Random, we disable Repeat_ALL so our manual transition logic takes over
-                player.setRepeatMode(isPureRandomEnabled ? Player.REPEAT_MODE_OFF : Player.REPEAT_MODE_ALL);
             }
         }
         return super.onStartCommand(intent, flags, startId);
