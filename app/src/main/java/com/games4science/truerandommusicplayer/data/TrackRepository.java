@@ -32,8 +32,13 @@ public class TrackRepository {
                 retriever.setDataSource(context, uri);
                 title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
                 artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-            } catch (Exception ignored) {}
-            finally { retriever.release(); }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    retriever.release();
+                } catch (Exception ignored) {}
+            }
 
             // fallback title/artist if metadata is missing
             if (title == null || title.isEmpty()) { title = MyUtils.getFileNameFromUri(context, uri); }

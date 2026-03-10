@@ -9,8 +9,9 @@ import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
-import androidx.media3.session.MediaSession.ControllerInfo;
+
 import com.games4science.truerandommusicplayer.data.TrackRepository;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -29,19 +30,24 @@ public class MusicService extends MediaSessionService {
         player.addListener(new Player.Listener() {
             @Override
             public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
-                // REASON_AUTO_TRANSITION means the previous song just finished
-                if (isPureRandomEnabled && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO_TRANSITION) {
-                    int totalTracks = player.getMediaItemCount();
-                    if (totalTracks > 0) {
-                        int nextRandomIndex = (int) (Math.random() * totalTracks); //TODO check better formula
-                        player.seekTo(nextRandomIndex, 0);
-                    }
-                }
+                handleMediaItemTransition(reason);
             }
         });
 
         mediaSession = new MediaSession.Builder(this, player).build();
         loadPlaylist(false); // Load but don't force play immediately on boot
+    }
+
+
+    private void handleMediaItemTransition(int reason) {
+        // REASON_AUTO_TRANSITION means the previous song just finished
+        if (isPureRandomEnabled && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+            int totalTracks = player.getMediaItemCount();
+            if (totalTracks > 0) {
+                int nextRandomIndex = (int) (Math.random() * totalTracks);
+                player.seekTo(nextRandomIndex, 0);
+            }
+        }
     }
 
     private void loadPlaylist(boolean playImmediately) {
@@ -90,7 +96,7 @@ public class MusicService extends MediaSessionService {
 
     @Nullable
     @Override
-    public MediaSession onGetSession(@NonNull ControllerInfo controllerInfo) {
+    public MediaSession onGetSession(@NonNull MediaSession.ControllerInfo controllerInfo) {
         return mediaSession;
     }
 
