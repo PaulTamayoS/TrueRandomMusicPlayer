@@ -158,7 +158,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Pure Random Madness!!!!"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:thumbIcon="@drawable/ic_dice"
+        app:thumbIconSize="30dp"
+        app:thumbIconTint="@android:color/white"
+        app:trackDecorationTint="@android:color/holo_orange_dark" />
 
 </LinearLayout>
 
