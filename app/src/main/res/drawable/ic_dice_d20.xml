@@ -8,7 +8,7 @@
 
     <!-- 1. THE TOP CAP (Now with a perfectly straight horizontal base at Y=7.5) -->
     <path
-        android:fillColor="#E0E0E0"
+        android:fillColor="#111111"
         android:pathData="M12,3.5 L18,7.5 L6,7.5 Z" />
 
     <!-- 2. THE MAIN FRONT FACE (Centered and prominent) -->
@@ -18,36 +18,36 @@
 
     <!-- 3. UPPER LEFT FACET (Snaps to the straight base of the top cap) -->
     <path
-        android:fillColor="#BDBDBD"
+        android:fillColor="#FFFFFF"
         android:pathData="M5.5,8.7 L11.1,8 L7,14.5 Z" />
 
     <!-- 4. UPPER RIGHT FACET (Snaps to the straight base of the top cap) -->
     <path
-        android:fillColor="#BDBDBD"
+        android:fillColor="#FFFFFF"
         android:pathData="M18.5,8.7 L12.9,8 L17,14.5 Z" />
 
     <!-- 5. LOWER LEFT SIDE -->
     <path
-        android:fillColor="#9E9E9E"
+        android:fillColor="#FFFFFF"
         android:pathData="M5.3,10.1 L5.3,17.4 L7,16 Z" />
 
     <path
-        android:fillColor="#9E9E9E"
+        android:fillColor="#FFFFFF"
         android:pathData="M11.2,20.5 L7.2,16.5 L5.6,17.8 Z" />
 
     <!-- 6. LOWER RIGHT SIDE -->
     <path
-        android:fillColor="#9E9E9E"
+        android:fillColor="#111111"
         android:pathData="M18.7,10.1 L18.7,17.4 L17,16 Z" />
 
     <path
-        android:fillColor="#9E9E9E"
+        android:fillColor="#111111"
         android:pathData="M12.8,20.5 L16.9,16.6 L18.4,17.8 Z" />
 
 
     <!-- 7. BOTTOM CENTER (Shadow side) -->
     <path
-        android:fillColor="#BDBDBD"
+        android:fillColor="#FFFFFF"
         android:pathData="M12,20.5 L16,16.5 L8,16.5 Z" />
 
 </vector>
