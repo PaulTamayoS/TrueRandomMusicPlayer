@@ -38,14 +38,16 @@ public class MusicService extends MediaSessionService {
         loadPlaylist(false); // Load but don't force play immediately on boot
     }
 
-
     private void handleMediaItemTransition(int reason) {
-        // REASON_AUTO_TRANSITION means the previous song just finished
-        if (isPureRandomEnabled && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
-            int totalTracks = player.getMediaItemCount();
-            if (totalTracks > 0) {
-                int nextRandomIndex = (int) (Math.random() * totalTracks);
-                player.seekTo(nextRandomIndex, 0);
+        if (isPureRandomEnabled == true) {
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || // MEDIA_ITEM_TRANSITION_REASON_AUTO: means the previous song just finished
+                reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) // MEDIA_ITEM_TRANSITION_REASON_SEEK: User clicked Next or Previous
+            {
+                int totalTracks = player.getMediaItemCount();
+                if (totalTracks > 1) {
+                    int nextRandomIndex = (int) (Math.random() * totalTracks);
+                    player.seekTo(nextRandomIndex, 0);
+                }
             }
         }
     }
@@ -59,7 +61,7 @@ public class MusicService extends MediaSessionService {
             return;
         }
 
-        Collections.shuffle(tracks); // TRUE RANDOM
+        Collections.shuffle(tracks); // Shuffle creates a Light Random
 
         Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
 
