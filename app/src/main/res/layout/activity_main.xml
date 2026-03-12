@@ -82,7 +82,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="16dp"
-        android:weightSum="4">
+        android:gravity="center_vertical">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPrevious"
@@ -90,10 +90,10 @@
             android:layout_height="64dp"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            app:iconSize="48dp"
+            app:iconSize="60dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            app:icon="@android:drawable/ic_media_previous"
+            app:icon="@drawable/ic_skip_previous"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:cornerRadius="5dp"
@@ -105,10 +105,10 @@
             android:layout_height="64dp"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            app:iconSize="48dp"
+            app:iconSize="60dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            app:icon="@android:drawable/ic_media_play"
+            app:icon="@drawable/ic_play"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:cornerRadius="5dp"
@@ -120,29 +120,44 @@
             android:layout_height="64dp"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            app:iconSize="48dp"
+            app:iconSize="60dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            app:icon="@android:drawable/ic_media_next"
+            app:icon="@drawable/ic_skip_next"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:cornerRadius="5dp"
             android:contentDescription="@string/next"/>
 
-    </LinearLayout>
+        <View
+            android:layout_width="2dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="12dp"
+            android:background="?attr/colorOutlineVariant" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/stop" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStop"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            app:iconSize="60dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:icon="@drawable/ic_stop"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:cornerRadius="5dp"
+            android:contentDescription="@string/stop"/>
+
+    </LinearLayout>
 
     <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/switchPureRandom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Pure Random (Dice Roll) "
+        android:text="Pure Random Madness!!!!"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </LinearLayout>

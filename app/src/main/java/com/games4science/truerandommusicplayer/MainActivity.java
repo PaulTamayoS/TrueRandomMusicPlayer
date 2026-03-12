@@ -95,9 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void updatePlayPauseIcon(boolean isPlaying) {
         if (isPlaying) {
-            binding.btnPlayPause.setIconResource(android.R.drawable.ic_media_pause);
+            binding.btnPlayPause.setIconResource(R.drawable.ic_pause);
         } else {
-            binding.btnPlayPause.setIconResource(android.R.drawable.ic_media_play);
+            binding.btnPlayPause.setIconResource(R.drawable.ic_play);
         }
     }
 
