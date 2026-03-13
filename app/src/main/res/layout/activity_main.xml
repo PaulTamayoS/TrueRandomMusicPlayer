@@ -17,7 +17,7 @@
         android:id="@+id/tvAppTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
+        android:text="@string/app_title_normal_mode"
         android:textAppearance="?attr/textAppearanceHeadlineMedium"
         android:textColor="?attr/colorOnBackground"
         android:layout_marginBottom="48dp"/>
