@@ -159,7 +159,6 @@
         android:layout_marginTop="16dp"
         android:text="Pure Random Madness!!!!"
         android:textAppearance="?attr/textAppearanceTitleMedium"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:thumbIcon="@drawable/ic_dice_d20"
         app:thumbIconSize="30dp"
         app:thumbIconTint="@android:color/white"

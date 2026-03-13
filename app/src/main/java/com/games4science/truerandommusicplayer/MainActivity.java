@@ -280,32 +280,50 @@ public class MainActivity extends AppCompatActivity {
     //endregion
 
     private void applyMadnessTheme(boolean isMadness) {
-        // Pick your "Madness" color (e.g., a vibrant Orange or Deep Red)
-        int madnessColor = getResources().getColor(android.R.color.holo_orange_dark, getTheme());
+        // 1. Define the Madness color (Orange)
+        int madnessColor = ContextCompat.getColor(this, android.R.color.holo_orange_dark);
 
-        // Get the "Normal" color from the theme (Day or Night)
-        // This looks at your themes.xml and finds "colorPrimary"
+        // 2. Fetch the "Normal" Primary color from the current theme (Day or Night)
         TypedValue typedValue = new TypedValue();
         getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
         int themePrimaryColor = typedValue.data;
 
-        if (isMadness) {
-            // Make the control buttons look "Wild"
-            binding.btnPlayPause.setBackgroundTintList(ColorStateList.valueOf(madnessColor));
-            binding.btnNext.setBackgroundTintList(ColorStateList.valueOf(madnessColor));
-            binding.btnPrevious.setBackgroundTintList(ColorStateList.valueOf(madnessColor));
+        // 3. Define the state lists
+        ColorStateList madnessList = ColorStateList.valueOf(madnessColor);
+        ColorStateList normalList = ColorStateList.valueOf(themePrimaryColor);
 
-            // Optional: Change the title text to reflect the madness
+        if (isMadness) {
+            // APPLY MADNESS
             binding.tvAppTitle.setText(R.string.app_title_madness_mode);
             binding.tvAppTitle.setTextColor(madnessColor);
-        } else {
-            // Reset everything to default theme colors
-            binding.btnPlayPause.setBackgroundTintList(ColorStateList.valueOf(themePrimaryColor));
-            binding.btnNext.setBackgroundTintList(ColorStateList.valueOf(themePrimaryColor));
-            binding.btnPrevious.setBackgroundTintList(ColorStateList.valueOf(themePrimaryColor));
 
+            // Update all your buttons from the XML
+            binding.btnPlayPause.setBackgroundTintList(madnessList);
+            binding.btnNext.setBackgroundTintList(madnessList);
+            binding.btnPrevious.setBackgroundTintList(madnessList);
+            binding.btnStop.setBackgroundTintList(madnessList);
+            binding.btnAddMusic.setBackgroundTintList(madnessList);
+
+            // Make the SeekBar orange too!
+            binding.seekBar.getProgressDrawable().setTint(madnessColor);
+            binding.seekBar.getThumb().setTint(madnessColor);
+        } else {
+            // RESET TO NORMAL (Respects Day/Night)
             binding.tvAppTitle.setText(R.string.app_title_normal_mode);
-            binding.tvAppTitle.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+
+            // For the title, we usually want the standard text color
+            getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnBackground, typedValue, true);
+            binding.tvAppTitle.setTextColor(typedValue.data);
+
+            binding.btnPlayPause.setBackgroundTintList(normalList);
+            binding.btnNext.setBackgroundTintList(normalList);
+            binding.btnPrevious.setBackgroundTintList(normalList);
+            binding.btnStop.setBackgroundTintList(normalList);
+            binding.btnAddMusic.setBackgroundTintList(normalList);
+
+            // Reset SeekBar to theme primary
+            binding.seekBar.getProgressDrawable().setTint(themePrimaryColor);
+            binding.seekBar.getThumb().setTint(themePrimaryColor);
         }
     }
 }
