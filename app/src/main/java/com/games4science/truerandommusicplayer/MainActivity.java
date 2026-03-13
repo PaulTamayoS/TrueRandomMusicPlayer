@@ -7,6 +7,7 @@ import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -282,29 +283,29 @@ public class MainActivity extends AppCompatActivity {
         // Pick your "Madness" color (e.g., a vibrant Orange or Deep Red)
         int madnessColor = getResources().getColor(android.R.color.holo_orange_dark, getTheme());
 
-        if (isMadness) {
-            // Change the switch color
-           // binding.switchPureRandom.setThumbTintList(ColorStateList.valueOf(madnessColor));
-            //binding.switchPureRandom.setTrackTintList(ColorStateList.valueOf(madnessColor));
+        // Get the "Normal" color from the theme (Day or Night)
+        // This looks at your themes.xml and finds "colorPrimary"
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+        int themePrimaryColor = typedValue.data;
 
+        if (isMadness) {
             // Make the control buttons look "Wild"
             binding.btnPlayPause.setBackgroundTintList(ColorStateList.valueOf(madnessColor));
             binding.btnNext.setBackgroundTintList(ColorStateList.valueOf(madnessColor));
             binding.btnPrevious.setBackgroundTintList(ColorStateList.valueOf(madnessColor));
 
             // Optional: Change the title text to reflect the madness
-            binding.tvAppTitle.setText("TRUE RANDOM MADNESS!");
+            binding.tvAppTitle.setText(R.string.app_title_madness_mode);
             binding.tvAppTitle.setTextColor(madnessColor);
         } else {
             // Reset everything to default theme colors
-           // binding.switchPureRandom.setThumbTintList(null);
-            //binding.switchPureRandom.setTrackTintList(null);
-            binding.btnPlayPause.setBackgroundTintList(null);
-            binding.btnNext.setBackgroundTintList(null);
-            binding.btnPrevious.setBackgroundTintList(null);
+            binding.btnPlayPause.setBackgroundTintList(ColorStateList.valueOf(themePrimaryColor));
+            binding.btnNext.setBackgroundTintList(ColorStateList.valueOf(themePrimaryColor));
+            binding.btnPrevious.setBackgroundTintList(ColorStateList.valueOf(themePrimaryColor));
 
-            binding.tvAppTitle.setText(R.string.app_name);
-            binding.tvAppTitle.setTextColor(getResources().getColor(android.R.color.white, getTheme()));
+            binding.tvAppTitle.setText(R.string.app_title_normal_mode);
+            binding.tvAppTitle.setTextColor(ContextCompat.getColor(this, android.R.color.white));
         }
     }
 }
