@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">TrueRandomMusicPlayer</string>
+    <string name="app_title_normal_mode">True Random Music Player</string>
+    <string name="app_title_madness_mode">PURE RANDOM MADNESS!</string>
     <string name="add_songs_to_library">Add Songs to Library</string>
     <string name="clear_library">Clear Library</string>
     <string name="stop">Stop and Close Notification Popup</string>
