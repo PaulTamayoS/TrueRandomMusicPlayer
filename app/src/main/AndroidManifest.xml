@@ -57,6 +57,8 @@
             <!-- Required for lock screen & headset controls -->
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
+                <!-- For Legacy/Bluetooth/Car compatibility (Recommended) -->
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
 
         </service>
