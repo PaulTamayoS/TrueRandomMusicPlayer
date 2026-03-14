@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+
+import androidx.documentfile.provider.DocumentFile;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import com.games4science.truerandommusicplayer.util.MyUtils;
@@ -60,6 +62,29 @@ public class TrackRepository {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static int saveTracksFromFolder(Context context, Uri folderUri) {
+        DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
+        if (rootFolder == null || !rootFolder.isDirectory()) return 0;
+
+        int tracksAdded = 0;
+        // Get all files in the folder
+        DocumentFile[] files = rootFolder.listFiles();
+
+        for (DocumentFile file : files) {
+            if (file.isDirectory()) {
+                // Optional: You could recursively call this method for subfolders here
+                // tracksAdded += saveTracksFromFolder(context, file.getUri());
+            } else {
+                String mimeType = file.getType(); // e.g. "audio/mpeg"
+                if (mimeType != null && mimeType.startsWith("audio/")) {
+                    saveTrack(context, file.getUri());
+                    tracksAdded++;
+                }
+            }
+        }
+        return tracksAdded;
     }
 
     public static void clearTracks(Context context) {

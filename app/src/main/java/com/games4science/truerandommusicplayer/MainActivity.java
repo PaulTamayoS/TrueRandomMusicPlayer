@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         connectToService();
 
-        binding.btnAddMusic.setOnClickListener(v -> openPicker());
+        binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
         binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
         binding.btnPlayPause.setOnClickListener(v -> OnClickBtnPlayPause());
         binding.btnNext.setOnClickListener(v -> OnClickBtnNext());
@@ -145,6 +146,31 @@ public class MainActivity extends AppCompatActivity {
                     }
             );
 
+    private final ActivityResultLauncher<Uri> openFolderLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocumentTree(), folderUri -> {
+                if (folderUri != null) {
+                    // 1. Take persistable permission so we don't lose access on reboot
+                    getContentResolver().takePersistableUriPermission(folderUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    // Show a loading toast
+                    Toast.makeText(this, "Scanning folder... please wait", Toast.LENGTH_SHORT).show();
+
+                    // Run this in a background thread so the UI doesn't freeze
+                    new Thread(() -> {
+                        int countAddedTracks = TrackRepository.saveTracksFromFolder(this, folderUri);
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
+
+                            // 3. Notify the service to reload
+                            Intent serviceIntent = new Intent(this, MusicService.class);
+                            serviceIntent.setAction("LOAD_PLAYLIST");
+                            ContextCompat.startForegroundService(this, serviceIntent);
+                        });
+                    }).start();
+                }
+            });
+
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33) {
             if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
@@ -210,11 +236,32 @@ public class MainActivity extends AppCompatActivity {
 
     //region UI Listeners
 
-    private void openPicker() {
+    private void openPicker(View v) {
+        androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, v);
+        popup.getMenu().add("Select Files");
+        popup.getMenu().add("Select Folder");
+
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getTitle().equals("Select Files")) {
+                openFilePicker();
+            } else {
+                openFolderPicker();
+            }
+            return true;
+        });
+        popup.show();
+    }
+
+    private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("audio/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         openPickerLauncher.launch(intent);
+    }
+
+    private void openFolderPicker() {
+        // This triggers the Android directory selector
+        openFolderLauncher.launch(null);
     }
 
     private void OnClickBtnClearLibrary() {
