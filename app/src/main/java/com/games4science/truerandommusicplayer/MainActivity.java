@@ -233,11 +233,12 @@ public class MainActivity extends AppCompatActivity {
 
                 if (item != null && item.mediaMetadata != null ) {
                     String title = item.mediaMetadata.title != null ? item.mediaMetadata.title.toString() : "Unknown Song";
+                    String artist = item.mediaMetadata.artist != null ? item.mediaMetadata.artist.toString() : "X";
 
                     // Show "Current Index / Total Tracks" for better UX
                     int currentIdx = controller.getCurrentMediaItemIndex() + 1;
                     int total = controller.getMediaItemCount();
-                    binding.txtTrackTitle.setText(title + " (" + currentIdx + "/" + total + ")");
+                    binding.txtTrackTitle.setText(artist +" - " + title + " (" + currentIdx + "/" + total + ")");
                 }
             }
             progressHandler.postDelayed(this, 500);

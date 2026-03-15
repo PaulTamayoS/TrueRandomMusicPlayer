@@ -97,7 +97,7 @@ public class TrackRepository {
 
         // fallback title/artist if metadata is missing
         if (title == null || title.isEmpty()) { title = MyUtils.getFileNameFromUri(context, uri); }
-        if (artist == null || artist.isEmpty()) { artist = "Unknown Artist"; }
+        if (artist == null || artist.isEmpty()) { artist = "X"; }
 
         JSONObject trackJson = new JSONObject();
         trackJson.put("uri", uri.toString());
