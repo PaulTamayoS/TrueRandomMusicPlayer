@@ -156,8 +156,7 @@ public class MainActivity extends AppCompatActivity {
                     // 1. Take persistable permission so we don't lose access on reboot
                     getContentResolver().takePersistableUriPermission(folderUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                    // Show a loading toast
-                    Toast.makeText(this, "Scanning folder... please wait", Toast.LENGTH_SHORT).show();
+                    binding.txtTrackTitle.setText("Deep scanning folders... please WAIT!!!!!");
 
                     // Run this in a background thread so the UI doesn't freeze
                     new Thread(() -> {

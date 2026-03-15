@@ -49,16 +49,21 @@ public class TrackRepository {
         DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
         if (rootFolder == null || !rootFolder.isDirectory()) return 0;
 
-        DocumentFile[] files = rootFolder.listFiles();
+        return scanDirectoryRecursive(context,  rootFolder);
+    }
+
+    private static int scanDirectoryRecursive(Context context, DocumentFile directory) {
+        DocumentFile[] files = directory.listFiles();
         JSONArray batchArray = new JSONArray();
         int addedCount = 0;
 
         for (DocumentFile file : files) {
-            if (file.isFile() && file.getType() != null && file.getType().startsWith("audio/")) {
+            if (file.isDirectory()) {
+                // RECURSION: If it's a folder, dive inside and add those results to our count
+                addedCount += scanDirectoryRecursive(context, file);
+            } else if (file.isFile() && file.getType() != null && file.getType().startsWith("audio/")) {
                 try {
-                    // DO NOT call takePersistableUriPermission here.
-                    // Access is inherited from the parent folderUri.
-
+                    // Get metadata and add to our local batch
                     JSONObject trackJson = getTrackMetadata(context, file.getUri());
                     batchArray.put(trackJson);
                     addedCount++;
@@ -69,7 +74,10 @@ public class TrackRepository {
         }
 
         // Save the whole batch at once to prevent "App Not Responding"
-        saveBatchToPrefs(context, batchArray);
+        if (batchArray.length() > 0) {
+            saveBatchToPrefs(context, batchArray);
+        }
+
         return addedCount;
     }
 
