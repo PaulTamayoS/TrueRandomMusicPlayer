@@ -157,16 +157,23 @@ public class MainActivity extends AppCompatActivity {
 
                     // Run this in a background thread so the UI doesn't freeze
                     new Thread(() -> {
-                        int countAddedTracks = TrackRepository.saveTracksFromFolder(this, folderUri);
+                        try {
+                            // The heavy lifting happens here
+                            int countAddedTracks = TrackRepository.saveTracksFromFolder(this, folderUri);
 
-                        runOnUiThread(() -> {
-                            Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
+                            runOnUiThread(() -> {
+                                Intent serviceIntent = new Intent(this, MusicService.class);
+                                serviceIntent.setAction("LOAD_PLAYLIST");
+                                ContextCompat.startForegroundService(this, serviceIntent);
 
-                            // 3. Notify the service to reload
-                            Intent serviceIntent = new Intent(this, MusicService.class);
-                            serviceIntent.setAction("LOAD_PLAYLIST");
-                            ContextCompat.startForegroundService(this, serviceIntent);
-                        });
+                                Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            runOnUiThread(() -> {
+                                Toast.makeText(this, "Error scanning folder: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+                        }
                     }).start();
                 }
             });

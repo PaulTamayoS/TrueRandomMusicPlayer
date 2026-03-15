@@ -21,6 +21,7 @@ public class TrackRepository {
     private static final String PREFS = "tracks_repo";
     private static final String KEY_JSON_TRACKS = "json_tracks"; // Store everything in one JSON string
 
+    //TODO : saveTrack and saveTracksFromFolder have some code in common, see if can refactor it
     public static void saveTrack(Context context, Uri uri) {
         try {
             context.getContentResolver().takePersistableUriPermission( uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -66,30 +67,44 @@ public class TrackRepository {
 
     public static int saveTracksFromFolder(Context context, Uri folderUri) {
         DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
-        if (rootFolder == null || !rootFolder.isDirectory()) return 0;
+        if (rootFolder == null || !rootFolder.isDirectory()) {
+            return 0;
+        }
 
-        int tracksAdded = 0;
-        // Get all files in the folder
         DocumentFile[] files = rootFolder.listFiles();
+        int addedCount = 0;
 
         for (DocumentFile file : files) {
-            if (file.isDirectory()) {
-                // Optional: You could recursively call this method for subfolders here
-                // tracksAdded += saveTracksFromFolder(context, file.getUri());
-            } else {
-                String mimeType = file.getType(); // e.g. "audio/mpeg"
-                if (mimeType != null && mimeType.startsWith("audio/")) {
-                    saveTrack(context, file.getUri());
-                    tracksAdded++;
+            // Only process audio files
+            if (file.isFile() && file.getType() != null && file.getType().startsWith("audio/")) {
+                Uri fileUri = file.getUri();
+
+                try {
+                    // IMPORTANT: You must take permission for the individual file URI
+                    // if you want Media3 to be able to play it later from the background service.
+                    context.getContentResolver().takePersistableUriPermission(
+                            fileUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+
+                    // Now call your existing saveTrack method
+                    saveTrack(context, fileUri);
+                    addedCount++;
+
+                } catch (Exception e) {
+                    // Some files (like those in System folders) don't allow persistent URI permissions
+                    // Try saving anyway, maybe it's already accessible
+                    saveTrack(context, fileUri);
+                    addedCount++;
                 }
             }
         }
-        return tracksAdded;
+        return addedCount;
     }
 
     public static void clearTracks(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit().remove(KEY_JSON_TRACKS).apply();
+        prefs.edit().remove(KEY_JSON_TRACKS).commit();
     }
 
     public static List<MediaItem> getTracks(Context context) {
