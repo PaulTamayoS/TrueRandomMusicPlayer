@@ -55,9 +55,10 @@ public class MusicService extends MediaSessionService {
     private void loadPlaylist(boolean playImmediately) {
         List<MediaItem> tracks = TrackRepository.getTracks(this);
 
-        if (tracks.isEmpty()) {
+        if (tracks == null || tracks.isEmpty()) {
             Toast.makeText(this, "No Tracks into the current list !!!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
             player.stop();
+            player.clearMediaItems();
             return;
         }
 
