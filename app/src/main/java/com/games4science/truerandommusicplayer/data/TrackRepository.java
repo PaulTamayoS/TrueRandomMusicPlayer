@@ -49,33 +49,32 @@ public class TrackRepository {
         DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
         if (rootFolder == null || !rootFolder.isDirectory()) return 0;
 
-        return scanDirectoryRecursive(context,  rootFolder);
+        JSONArray allTracks = new JSONArray();
+        int count = scanDirectoryRecursive(context, rootFolder, allTracks);
+
+        // Save everything ONCE at the very end
+        saveBatchToPrefs(context, allTracks);
+        return count;
     }
 
-    private static int scanDirectoryRecursive(Context context, DocumentFile directory) {
-        DocumentFile[] files = directory.listFiles();
-        JSONArray batchArray = new JSONArray();
+    private static int scanDirectoryRecursive(Context context, DocumentFile directory, JSONArray allTracks) {
         int addedCount = 0;
+        DocumentFile[] files = directory.listFiles();
 
         for (DocumentFile file : files) {
             if (file.isDirectory()) {
                 // RECURSION: If it's a folder, dive inside and add those results to our count
-                addedCount += scanDirectoryRecursive(context, file);
+                addedCount += scanDirectoryRecursive(context, file, allTracks);
             } else if (file.isFile() && file.getType() != null && file.getType().startsWith("audio/")) {
                 try {
                     // Get metadata and add to our local batch
                     JSONObject trackJson = getTrackMetadata(context, file.getUri());
-                    batchArray.put(trackJson);
+                    allTracks.put(trackJson);
                     addedCount++;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }
-
-        // Save the whole batch at once to prevent "App Not Responding"
-        if (batchArray.length() > 0) {
-            saveBatchToPrefs(context, batchArray);
         }
 
         return addedCount;
