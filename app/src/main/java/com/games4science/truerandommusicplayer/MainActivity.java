@@ -276,6 +276,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MusicService.class);
         intent.setAction("LOAD_PLAYLIST");
         ContextCompat.startForegroundService(this, intent);
+
+        binding.seekBar.setProgress(0);
+        binding.txtTime.setText( R.string.player_time_zero);
+        binding.txtTrackTitle.setText(R.string.no_track_playing);
     }
 
     private void OnClickBtnPlayPause() {

@@ -9,4 +9,6 @@
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="next">Next</string>
+    <string name="no_track_playing">No track playing</string>
+    <string name="player_time_zero">00:00 / 00:00</string>
 </resources>
