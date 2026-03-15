@@ -21,85 +21,105 @@ public class TrackRepository {
     private static final String PREFS = "tracks_repo";
     private static final String KEY_JSON_TRACKS = "json_tracks"; // Store everything in one JSON string
 
-    //TODO : saveTrack and saveTracksFromFolder have some code in common, see if can refactor it
+    /**
+     * Used for SINGLE file selection (User picked the file directly)
+     */
     public static void saveTrack(Context context, Uri uri) {
         try {
-            context.getContentResolver().takePersistableUriPermission( uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            // 1. Get metadata immediately when saving
-            String title = "Unknown Song";
-            String artist = "Unknown Artist";
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
+            // Only persist if the URI supports it (picked via ACTION_OPEN_DOCUMENT)
             try {
-                retriever.setDataSource(context, uri);
-                title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    retriever.release();
-                } catch (Exception ignored) {}
+                context.getContentResolver().takePersistableUriPermission(uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (SecurityException e) {
+                // Not a persistable URI, ignore and continue
             }
 
-            // fallback title/artist if metadata is missing
-            if (title == null || title.isEmpty()) { title = MyUtils.getFileNameFromUri(context, uri); }
-            if (artist == null || artist.isEmpty()) { artist = "Unknown Artist"; }
-
-            // 2. Load existing list, add new track, and save back
-            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            String jsonString = prefs.getString(KEY_JSON_TRACKS, "[]");
-            JSONArray array = new JSONArray(jsonString);
-
-            JSONObject trackJson = new JSONObject();
-            trackJson.put("uri", uri.toString());
-            trackJson.put("title", title);
-            trackJson.put("artist", artist);
-
-            array.put(trackJson);
-            prefs.edit().putString(KEY_JSON_TRACKS, array.toString()).apply();
+            JSONObject trackJson = getTrackMetadata(context, uri);
+            saveToPrefs(context, trackJson);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Used for FOLDER selection (User picked the folder)
+     */
     public static int saveTracksFromFolder(Context context, Uri folderUri) {
         DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
-        if (rootFolder == null || !rootFolder.isDirectory()) {
-            return 0;
-        }
+        if (rootFolder == null || !rootFolder.isDirectory()) return 0;
 
         DocumentFile[] files = rootFolder.listFiles();
+        JSONArray batchArray = new JSONArray();
         int addedCount = 0;
 
         for (DocumentFile file : files) {
-            // Only process audio files
             if (file.isFile() && file.getType() != null && file.getType().startsWith("audio/")) {
-                Uri fileUri = file.getUri();
-
                 try {
-                    // IMPORTANT: You must take permission for the individual file URI
-                    // if you want Media3 to be able to play it later from the background service.
-                    context.getContentResolver().takePersistableUriPermission(
-                            fileUri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    );
+                    // DO NOT call takePersistableUriPermission here.
+                    // Access is inherited from the parent folderUri.
 
-                    // Now call your existing saveTrack method
-                    saveTrack(context, fileUri);
+                    JSONObject trackJson = getTrackMetadata(context, file.getUri());
+                    batchArray.put(trackJson);
                     addedCount++;
-
                 } catch (Exception e) {
-                    // Some files (like those in System folders) don't allow persistent URI permissions
-                    // Try saving anyway, maybe it's already accessible
-                    saveTrack(context, fileUri);
-                    addedCount++;
+                    e.printStackTrace();
                 }
             }
         }
+
+        // Save the whole batch at once to prevent "App Not Responding"
+        saveBatchToPrefs(context, batchArray);
         return addedCount;
+    }
+
+    // --- HELPER METHODS TO CLEAN UP CODE ---
+    private static JSONObject getTrackMetadata(Context context, Uri uri) throws Exception {
+        String title = "Unknown Song";
+        String artist = "Unknown Artist";
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+        try {
+            retriever.setDataSource(context, uri);
+            title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        } catch (Exception ignored) {
+        } finally {
+            try { retriever.release(); } catch (Exception ignored) {}
+        }
+
+        // fallback title/artist if metadata is missing
+        if (title == null || title.isEmpty()) { title = MyUtils.getFileNameFromUri(context, uri); }
+        if (artist == null || artist.isEmpty()) { artist = "Unknown Artist"; }
+
+        JSONObject trackJson = new JSONObject();
+        trackJson.put("uri", uri.toString());
+        trackJson.put("title", title);
+        trackJson.put("artist", artist);
+        return trackJson;
+    }
+
+    private static void saveToPrefs(Context context, JSONObject trackJson) throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String jsonString = prefs.getString(KEY_JSON_TRACKS, "[]");
+        JSONArray array = new JSONArray(jsonString);
+        array.put(trackJson);
+        prefs.edit().putString(KEY_JSON_TRACKS, array.toString()).commit();
+    }
+
+    private static void saveBatchToPrefs(Context context, JSONArray newBatch) {
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            JSONArray existing = new JSONArray(prefs.getString(KEY_JSON_TRACKS, "[]"));
+
+            for (int i = 0; i < newBatch.length(); i++) {
+                existing.put(newBatch.get(i));
+            }
+
+            prefs.edit().putString(KEY_JSON_TRACKS, existing.toString()).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void clearTracks(Context context) {
