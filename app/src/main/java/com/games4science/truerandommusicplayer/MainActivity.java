@@ -111,37 +111,41 @@ public class MainActivity extends AppCompatActivity {
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-
                             Intent data = result.getData();
-                            boolean addedAny = false;
-                            int countAddedTracks = 0;
 
-                            if (data.getData() != null)
-                            {
-                                TrackRepository.saveTrack(this, data.getData());
-                                addedAny = true;
-                                countAddedTracks++;
-                            }
-                            else if (data.getClipData() != null)
-                            {
-                                for (int i = 0; i < data.getClipData().getItemCount(); i++)
-                                {
-                                    Uri uri = data.getClipData().getItemAt(i).getUri();
-                                    TrackRepository.saveTrack(this, uri);
-                                    addedAny = true;
+                            // Show a quick toast so the user knows something is happening
+                            Toast.makeText(this, "Adding files...", Toast.LENGTH_SHORT).show();
+
+                            // Move the loop to a background thread
+                            new Thread(() -> {
+                                int countAddedTracks = 0;
+
+                                // 1. Single file selection
+                                if (data.getData() != null) {
+                                    TrackRepository.saveTrack(this, data.getData());
                                     countAddedTracks++;
                                 }
-                            }
+                                // 2. Multiple file selection
+                                else if (data.getClipData() != null) {
+                                    for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                                        Uri uri = data.getClipData().getItemAt(i).getUri();
+                                        TrackRepository.saveTrack(this, uri);
+                                        countAddedTracks++;
+                                    }
+                                }
 
-                            if (addedAny) {
-                                Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
+                                // 3. Update UI and Service once finished
+                                if (countAddedTracks > 0) {
+                                    int finalCount = countAddedTracks;
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
 
-                                // Start the MediaSessionService
-                                Intent serviceIntent = new Intent(this, MusicService.class);
-                                serviceIntent.setAction("LOAD_PLAYLIST");
-
-                                ContextCompat.startForegroundService(this, serviceIntent);
-                            }
+                                        Intent serviceIntent = new Intent(this, MusicService.class);
+                                        serviceIntent.setAction("LOAD_PLAYLIST");
+                                        ContextCompat.startForegroundService(this, serviceIntent);
+                                    });
+                                }
+                            }).start();
                         }
                     }
             );
