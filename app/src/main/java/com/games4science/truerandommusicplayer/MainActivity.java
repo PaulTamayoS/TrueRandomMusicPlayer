@@ -69,6 +69,23 @@ public class MainActivity extends AppCompatActivity {
 
             applyMadnessTheme(isChecked); // Triggers the "Madness" UI change
         });
+
+        binding.volumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && controller != null) {
+                    // Convert 0-100 to 0.0-1.0
+                    float volume = progress / 100f;
+                    controller.setVolume(volume);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
    }
 
     private void connectToService() {

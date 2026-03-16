@@ -167,5 +167,34 @@
         app:thumbIconTint="@null"
         app:trackDecorationTint="@android:color/holo_orange_dark" />
 
+    <!-- Volume Control Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_lock_silent_mode"
+            app:tint="?attr/colorOnSurface" />
+
+        <SeekBar
+            android:id="@+id/volumeSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="100"
+            android:progress="100" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_lock_silent_mode_off"
+            app:tint="?attr/colorOnSurface" />
+    </LinearLayout>
+
 </LinearLayout>
 
