@@ -27,6 +27,7 @@ public class MusicService extends MediaSessionService {
         super.onCreate();
         player = new ExoPlayer.Builder(this).build();
         player.setRepeatMode(Player.REPEAT_MODE_ALL);// Loop the entire shuffled list
+        player.setVolume(0.4f);
 
         player.addListener(new Player.Listener() {
             @Override
