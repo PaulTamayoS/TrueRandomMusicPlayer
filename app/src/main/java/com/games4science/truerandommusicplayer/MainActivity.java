@@ -386,6 +386,9 @@ public class MainActivity extends AppCompatActivity {
             // Make the SeekBar orange too!
             binding.seekBar.getProgressDrawable().setTint(madnessColor);
             binding.seekBar.getThumb().setTint(madnessColor);
+
+            binding.volumeSeekBar.getProgressDrawable().setTint(madnessColor);
+            binding.volumeSeekBar.getThumb().setTint(madnessColor);
         } else {
             // RESET TO NORMAL (Respects Day/Night)
             binding.tvAppTitle.setText(R.string.app_title_normal_mode);
@@ -403,6 +406,9 @@ public class MainActivity extends AppCompatActivity {
             // Reset SeekBar to theme primary
             binding.seekBar.getProgressDrawable().setTint(themePrimaryColor);
             binding.seekBar.getThumb().setTint(themePrimaryColor);
+
+            binding.volumeSeekBar.getProgressDrawable().setTint(themePrimaryColor);
+            binding.volumeSeekBar.getThumb().setTint(themePrimaryColor);
         }
     }
 }
