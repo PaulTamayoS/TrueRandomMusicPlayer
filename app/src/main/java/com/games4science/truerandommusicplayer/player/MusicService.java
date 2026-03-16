@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -25,7 +27,19 @@ public class MusicService extends MediaSessionService {
     @Override
     public void onCreate() {
         super.onCreate();
-        player = new ExoPlayer.Builder(this).build();
+
+        // This tells Android: "I am a music player, treat me like one."
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build();
+
+        player = new ExoPlayer.Builder(this)
+                .setAudioAttributes(audioAttributes, true) // 'true' enables automatic ducking!
+                .setHandleAudioBecomingNoisy(true) // Pauses on headphone unplug
+                .setWakeMode(C.WAKE_MODE_NETWORK) // Prepares for future API/Network streaming
+                .build();
+
         player.setRepeatMode(Player.REPEAT_MODE_ALL);// Loop the entire shuffled list
         player.setVolume(0.4f);
 
