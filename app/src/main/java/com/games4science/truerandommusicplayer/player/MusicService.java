@@ -20,6 +20,7 @@ public class MusicService extends MediaSessionService {
     private ExoPlayer player;
     private MediaSession mediaSession;
     private boolean isPureRandomEnabled = false;
+    private boolean isSearchingRandomTrack = false;
 
     @Override
     public void onCreate() {
@@ -40,12 +41,20 @@ public class MusicService extends MediaSessionService {
 
     private void handleMediaItemTransition(int reason) {
         if (isPureRandomEnabled == true) {
+
+            // 1. If we are already in the middle of a random jump, STOP here.
+            if (isSearchingRandomTrack) {
+                isSearchingRandomTrack = false; // Reset for the next time
+                return;
+            }
+
             if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || // MEDIA_ITEM_TRANSITION_REASON_AUTO: means the previous song just finished
                 reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) // MEDIA_ITEM_TRANSITION_REASON_SEEK: User clicked Next or Previous
             {
                 int totalTracks = player.getMediaItemCount();
                 if (totalTracks > 1) {
                     int nextRandomIndex = (int) (Math.random() * totalTracks);
+                    isSearchingRandomTrack = true;
                     player.seekTo(nextRandomIndex, 0);
                 }
             }
