@@ -2,24 +2,16 @@
 <manifest package="com.games4science.truerandommusicplayer"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- ========================= -->
     <!--        PERMISSIONS        -->
     <!-- ========================= -->
-
-    <!-- Android 13+ notifications -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" tools:targetApi="33" />
-    <!-- Foreground service -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- Required for media playback foreground services (Android 14+) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" tools:targetApi="34" />
-    <!-- Keeps CPU awake during playback -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" tools:targetApi="33" /> <!-- Android 13+ notifications -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Foreground service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" tools:targetApi="34" /> <!-- Required for media playback foreground services (Android 14+) -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Keeps CPU awake during playback -->
     <!-- ========================= -->
     <!--        APPLICATION        -->
     <!-- ========================= -->
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,11 +21,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TrueRandomMusicPlayer">
-
         <!-- ========================= -->
         <!--        MAIN ACTIVITY      -->
         <!-- ========================= -->
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -42,20 +32,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <!-- ========================= -->
+        <!--  MANAGE PLAYLIST ACTIVITY -->
+        <!-- ========================= -->
         <activity
             android:name=".ManagePlaylistsActivity"
             android:exported="false" />
-
         <!-- ========================= -->
         <!--        MUSIC SERVICE      -->
         <!-- ========================= -->
-
         <service
             android:name=".player.MusicService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
-
             <!-- Required for lock screen & headset controls -->
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
@@ -64,5 +53,4 @@
             </intent-filter>
         </service>
     </application>
-
 </manifest>
