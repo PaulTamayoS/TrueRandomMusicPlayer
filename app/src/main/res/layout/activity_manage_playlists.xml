@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center"
+    android:gravity="top|center_horizontal"
     android:background="?attr/android:colorBackground"
     tools:context=".ManagePlaylistsActivity">
 
@@ -16,27 +16,35 @@
         android:id="@+id/tvTitlePlayListsManagement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Playlist Management"
+        android:text="Playlist Editor"
         android:textAppearance="?attr/textAppearanceHeadlineMedium"
         android:textColor="?attr/colorOnBackground"
-        android:layout_marginBottom="48dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="32dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Playlist : "
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorOnBackground" />
-
-    <EditText
-        android:id="@+id/editTextPlaylistName"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="25dp"
-        android:text="Enter Name" />
+        android:hint="Playlist Name"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextPlaylistName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/tvTotalSongsInPlaylist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 Songs in this Playlist"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="12dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddMusic"
@@ -51,61 +59,48 @@
         android:text="@string/add_songs_to_library"
         android:textColor="?attr/colorOnPrimary" />
 
-    <TextView
-        android:id="@+id/tvInstructions"
-        android:layout_width="wrap_content"
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Playlist XXX Total Songs"
-        android:textColor="?attr/colorOnBackground"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="center"/>
+        android:layout_marginVertical="24dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnClearLibrary"
+        style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/clear_library"/>
+        android:textColor="?attr/colorError"
+        android:text="Clear All Songs from Playlist"
+        app:icon="@android:drawable/ic_menu_delete"
+        app:iconTint="?attr/colorError"/>
 
+    <!-- Spacer to push buttons to bottom -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="80dp"
-        android:weightSum="5"
-        android:gravity="center_vertical">
+        android:gravity="center">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
-            android:text="Cancel Changes"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_margin="4dp"
-            android:layout_weight="2"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            app:cornerRadius="5dp"
-            android:contentDescription="Cancel Changes"/>
-
-        <View
-            android:layout_width="2dp"
-            android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp"
-            android:layout_weight="1"/>
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="20dp"
+            android:text="Cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
-            android:text="Save Changes"
+            style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:layout_margin="4dp"
-            android:layout_weight="2"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            app:cornerRadius="5dp"
-            android:contentDescription="Save Changes"/>
-
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="20dp"
+            android:text="Save Playlist" />
     </LinearLayout>
-
 </LinearLayout>
