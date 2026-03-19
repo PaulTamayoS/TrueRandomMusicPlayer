@@ -22,6 +22,28 @@
         android:textColor="?attr/colorOnBackground"
         android:layout_marginBottom="48dp"/>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Playlist : "
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnBackground" />
+
+        <Spinner
+            android:id="@+id/spinnerPlaylists"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="150dp"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
     <!-- Pick Music Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddMusic"
