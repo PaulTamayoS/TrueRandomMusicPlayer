@@ -37,6 +37,8 @@
         <!-- ========================= -->
         <activity
             android:name=".ManagePlaylistsActivity"
+            android:label="Playlist Editor"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <!-- ========================= -->
         <!--        MUSIC SERVICE      -->
