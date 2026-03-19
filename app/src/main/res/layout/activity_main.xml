@@ -64,6 +64,12 @@
         android:layout_height="wrap_content"
         android:text="@string/clear_library"/>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPlaylistEditor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Playlist Editor"/>
+
     <!-- Optional: Status / instructions -->
     <TextView
         android:id="@+id/tvInstructions"
