@@ -59,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
 
         binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
         binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
+
+        // Set up the listener for the Playlist Editor button
+        binding.btnPlaylistEditor.setOnClickListener(v -> OnClickBtnPlaylistEditor());
+
         binding.btnPlayPause.setOnClickListener(v -> OnClickBtnPlayPause());
         binding.btnNext.setOnClickListener(v -> OnClickBtnNext());
         binding.btnPrevious.setOnClickListener(v -> OnClickBtnPrevious());
@@ -328,6 +332,19 @@ public class MainActivity extends AppCompatActivity {
         binding.seekBar.setProgress(0);
         binding.txtTime.setText( R.string.player_time_zero);
         binding.txtTrackTitle.setText(R.string.no_track_playing);
+    }
+
+    private void OnClickBtnPlaylistEditor()
+    {
+        // Create an Intent to transition from this activity to the Manage Activity
+        Intent intent = new Intent(MainActivity.this, ManagePlaylistsActivity.class);
+
+        // Optional: Pass the name of the currently selected playlist
+        // so the editor knows which one to load
+        String selectedPlaylist = binding.spinnerPlaylists.getSelectedItem().toString();
+        intent.putExtra("playlist_name", selectedPlaylist);
+
+        startActivity(intent);
     }
 
     private void OnClickBtnPlayPause() {
