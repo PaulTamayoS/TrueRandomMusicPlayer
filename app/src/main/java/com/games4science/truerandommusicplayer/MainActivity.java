@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler progressHandler = new Handler(Looper.getMainLooper());
     private boolean isUserInteractingWithSeekingBar = false;
+
+    private String[] playlists = {"My Library", "Gym Mix", "Work Focus"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +90,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                playlists
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerPlaylists.setAdapter(adapter);
+
+        binding.spinnerPlaylists.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selected = playlists[position];
+
+                Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
+                // TODO : Logic to tell MusicService to switch JSON keys
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
    }
 
     private void connectToService() {
