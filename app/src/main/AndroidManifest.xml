@@ -14,7 +14,7 @@
     <!-- Required for media playback foreground services (Android 14+) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" tools:targetApi="34" />
     <!-- Keeps CPU awake during playback -->
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- ========================= -->
     <!--        APPLICATION        -->
@@ -37,13 +37,15 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
+
+        <activity
+            android:name=".ManagePlaylistsActivity"
+            android:exported="false" />
 
         <!-- ========================= -->
         <!--        MUSIC SERVICE      -->
@@ -60,9 +62,7 @@
                 <!-- For Legacy/Bluetooth/Car compatibility (Recommended) -->
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
-
         </service>
-
     </application>
 
 </manifest>

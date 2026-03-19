@@ -10,14 +10,14 @@
     android:padding="24dp"
     android:gravity="center"
     android:background="?attr/android:colorBackground"
-    tools:context=".MainActivity">
+    tools:context=".ManagePlaylistsActivity">
 
     <!-- App Title -->
     <TextView
-        android:id="@+id/tvAppTitle"
+        android:id="@+id/tvTitlePlayListsManagement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_title_normal_mode"
+        android:text="Playlist Management"
         android:textAppearance="?attr/textAppearanceHeadlineMedium"
         android:textColor="?attr/colorOnBackground"
         android:layout_marginBottom="48dp"/>
@@ -47,7 +47,7 @@
         android:id="@+id/tvInstructions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Playlist has XX Songs"
+        android:text="Playlist XXX Total Songs"
         android:textColor="?attr/colorOnBackground"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:layout_marginTop="24dp"
@@ -197,4 +197,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
