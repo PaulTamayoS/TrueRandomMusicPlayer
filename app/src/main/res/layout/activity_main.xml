@@ -44,33 +44,16 @@
             android:spinnerMode="dropdown" />
     </LinearLayout>
 
-    <!-- Pick Music Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddMusic"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="?attr/colorPrimary"
-        android:icon="@android:drawable/stat_sys_upload"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/add_songs_to_library"
-        android:textColor="?attr/colorOnPrimary" />
+      <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnPlaylistEditor"
+          style="@style/Widget.Material3.Button.TonalButton"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Playlist Editor"
+          app:icon="@android:drawable/ic_menu_edit"
+          android:layout_marginTop="8dp"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnClearLibrary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/clear_library"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnPlaylistEditor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Playlist Editor"/>
-
-    <!-- Optional: Status / instructions -->
+      <!-- Optional: Status / instructions -->
     <TextView
         android:id="@+id/tvInstructions"
         android:layout_width="wrap_content"
@@ -215,7 +198,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:max="100"
-            android:progress="25" />
+            android:progress="30" />
 
         <ImageView
             android:layout_width="24dp"

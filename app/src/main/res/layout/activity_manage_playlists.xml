@@ -51,13 +51,11 @@
         style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/colorPrimary"
-        android:icon="@android:drawable/stat_sys_upload"
         android:paddingHorizontal="24dp"
         android:paddingVertical="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/add_songs_to_library"
-        android:textColor="?attr/colorOnPrimary" />
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/add_songs_to_library" />
 
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
