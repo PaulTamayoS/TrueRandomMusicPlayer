@@ -57,9 +57,6 @@ public class MainActivity extends AppCompatActivity {
 
         connectToService();
 
-        binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
-        binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
-
         // Set up the listener for the Playlist Editor button
         binding.btnPlaylistEditor.setOnClickListener(v -> OnClickBtnPlaylistEditor());
 
@@ -95,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
+        binding.volumeSeekBar.setProgress(30);
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
@@ -111,13 +110,19 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
                 // TODO : Logic to tell MusicService to switch JSON keys
+
+                //binding.seekBar.setProgress(0);
+                //binding.txtTime.setText( R.string.player_time_zero);
+                //binding.txtTrackTitle.setText(R.string.no_track_playing);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-   }
+    }
+
+
 
     private void connectToService() {
         SessionToken sessionToken = new SessionToken(this, new ComponentName(this, MusicService.class));
@@ -153,81 +158,6 @@ public class MainActivity extends AppCompatActivity {
             binding.btnPlayPause.setIconResource(R.drawable.ic_play);
         }
     }
-
-    private final ActivityResultLauncher<Intent> openPickerLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> {
-                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                            Intent data = result.getData();
-
-                            // Show a quick toast so the user knows something is happening
-                            Toast.makeText(this, "Adding files...", Toast.LENGTH_SHORT).show();
-
-                            // Move the loop to a background thread
-                            new Thread(() -> {
-                                int countAddedTracks = 0;
-
-                                // 1. Single file selection
-                                if (data.getData() != null) {
-                                    TrackRepository.saveTrack(this, data.getData());
-                                    countAddedTracks++;
-                                }
-                                // 2. Multiple file selection
-                                else if (data.getClipData() != null) {
-                                    for (int i = 0; i < data.getClipData().getItemCount(); i++) {
-                                        Uri uri = data.getClipData().getItemAt(i).getUri();
-                                        TrackRepository.saveTrack(this, uri);
-                                        countAddedTracks++;
-                                    }
-                                }
-
-                                // 3. Update UI and Service once finished
-                                if (countAddedTracks > 0) {
-                                    int finalCount = countAddedTracks;
-                                    runOnUiThread(() -> {
-                                        Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
-
-                                        Intent serviceIntent = new Intent(this, MusicService.class);
-                                        serviceIntent.setAction("LOAD_PLAYLIST");
-                                        ContextCompat.startForegroundService(this, serviceIntent);
-                                    });
-                                }
-                            }).start();
-                        }
-                    }
-            );
-
-    private final ActivityResultLauncher<Uri> openFolderLauncher =
-            registerForActivityResult(new ActivityResultContracts.OpenDocumentTree(), folderUri -> {
-                if (folderUri != null) {
-                    // 1. Take persistable permission so we don't lose access on reboot
-                    getContentResolver().takePersistableUriPermission(folderUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    binding.txtTrackTitle.setText("Deep scanning folders... please WAIT!!!!!");
-
-                    // Run this in a background thread so the UI doesn't freeze
-                    new Thread(() -> {
-                        try {
-                            // The heavy lifting happens here
-                            int countAddedTracks = TrackRepository.saveTracksFromFolder(this, folderUri);
-
-                            runOnUiThread(() -> {
-                                Intent serviceIntent = new Intent(this, MusicService.class);
-                                serviceIntent.setAction("LOAD_PLAYLIST");
-                                ContextCompat.startForegroundService(this, serviceIntent);
-
-                                Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, "Error scanning folder: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                            });
-                        }
-                    }).start();
-                }
-            });
 
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33) {
@@ -294,45 +224,6 @@ public class MainActivity extends AppCompatActivity {
     };
 
     //region UI Listeners
-
-    private void openPicker(View v) {
-        androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, v);
-        popup.getMenu().add("Select Files");
-        popup.getMenu().add("Select Folder");
-
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getTitle().equals("Select Files")) {
-                openFilePicker();
-            } else {
-                openFolderPicker();
-            }
-            return true;
-        });
-        popup.show();
-    }
-
-    private void openFilePicker() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("audio/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        openPickerLauncher.launch(intent);
-    }
-
-    private void openFolderPicker() {
-        // This triggers the Android directory selector
-        openFolderLauncher.launch(null);
-    }
-
-    private void OnClickBtnClearLibrary() {
-        TrackRepository.clearTracks(this);
-        Intent intent = new Intent(this, MusicService.class);
-        intent.setAction("LOAD_PLAYLIST");
-        ContextCompat.startForegroundService(this, intent);
-
-        binding.seekBar.setProgress(0);
-        binding.txtTime.setText( R.string.player_time_zero);
-        binding.txtTrackTitle.setText(R.string.no_track_playing);
-    }
 
     private void OnClickBtnPlaylistEditor()
     {
@@ -402,6 +293,8 @@ public class MainActivity extends AppCompatActivity {
 
     //endregion
 
+    //region UI Skin Swapper
+
     private void applyMadnessTheme(boolean isMadness) {
         // 1. Define the Madness color (Orange)
         int madnessColor = ContextCompat.getColor(this, android.R.color.holo_orange_dark);
@@ -425,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
             binding.btnNext.setBackgroundTintList(madnessList);
             binding.btnPrevious.setBackgroundTintList(madnessList);
             binding.btnStop.setBackgroundTintList(madnessList);
-            binding.btnAddMusic.setBackgroundTintList(madnessList);
 
             // Make the SeekBar orange too!
             binding.seekBar.getProgressDrawable().setTint(madnessColor);
@@ -445,7 +337,6 @@ public class MainActivity extends AppCompatActivity {
             binding.btnNext.setBackgroundTintList(normalList);
             binding.btnPrevious.setBackgroundTintList(normalList);
             binding.btnStop.setBackgroundTintList(normalList);
-            binding.btnAddMusic.setBackgroundTintList(normalList);
 
             // Reset SeekBar to theme primary
             binding.seekBar.getProgressDrawable().setTint(themePrimaryColor);
@@ -455,4 +346,6 @@ public class MainActivity extends AppCompatActivity {
             binding.volumeSeekBar.getThumb().setTint(themePrimaryColor);
         }
     }
+
+    //endregion
 }
