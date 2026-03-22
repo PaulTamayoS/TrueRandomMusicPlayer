@@ -41,7 +41,7 @@ public class MusicService extends MediaSessionService {
                 .build();
 
         player.setRepeatMode(Player.REPEAT_MODE_ALL);// Loop the entire shuffled list
-        player.setVolume(0.25f);
+        player.setVolume(0.30f);
 
         player.addListener(new Player.Listener() {
             @Override
