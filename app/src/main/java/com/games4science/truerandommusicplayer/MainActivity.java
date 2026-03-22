@@ -94,14 +94,16 @@ public class MainActivity extends AppCompatActivity {
 
         binding.volumeSeekBar.setProgress(30);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                playlists
-        );
+        ReloadDropDownSpinnerPlaylists();
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerPlaylists.setAdapter(adapter);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+//                this,
+//                android.R.layout.simple_spinner_item,
+//                playlists
+//        );
+//
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        binding.spinnerPlaylists.setAdapter(adapter);
 
         binding.spinnerPlaylists.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -111,6 +113,14 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
                 // TODO : Logic to tell MusicService to switch JSON keys
 
+
+//                // Trigger the service to load this specific JSON
+//                Intent intent = new Intent(MainActivity.this, MusicService.class);
+//                intent.setAction("LOAD_PLAYLIST");
+//                intent.putExtra("PLAYLIST_NAME", selected);
+//                startService(intent);
+
+
                 //binding.seekBar.setProgress(0);
                 //binding.txtTime.setText( R.string.player_time_zero);
                 //binding.txtTrackTitle.setText(R.string.no_track_playing);
@@ -119,10 +129,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
     }
-
-
 
     private void connectToService() {
         SessionToken sessionToken = new SessionToken(this, new ComponentName(this, MusicService.class));
@@ -179,6 +186,37 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // This runs every time you come back from the Editor
+        OnResumeRefreshPlaylistSpinner();
+    }
+
+    private void OnResumeRefreshPlaylistSpinner() {
+        // TODO: Later, load this array from SharedPreferences/TrackRepository
+        // playlists = TrackRepository.getPlaylistNames(this);
+
+
+        ReloadDropDownSpinnerPlaylists();
+
+        // Optional: Auto-select the last active playlist
+    }
+
+    private void ReloadDropDownSpinnerPlaylists()
+    {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                playlists
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerPlaylists.setAdapter(adapter);
+    }
+
+
 
     @Override
     protected void onDestroy() {

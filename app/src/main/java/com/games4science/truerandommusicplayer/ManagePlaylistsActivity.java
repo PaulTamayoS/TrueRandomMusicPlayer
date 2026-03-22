@@ -35,13 +35,26 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         // Check if we are EDITING an existing playlist
         originalName = getIntent().getStringExtra("playlist_name");
-        if (originalName != null || originalName.isEmpty() == false) {
-            binding.editTextPlaylistName.setText(originalName);
+
+        if (originalName == null || originalName.isEmpty()) {
+            originalName = "New Library";
+        }
+        else {
             //loadExistingPlaylistData(originalName);
         }
 
+        binding.editTextPlaylistName.setText(originalName);
+//        updateSongCountUI();
+
         setupButtons();
     }
+
+//    private void updateSongCountUI() {
+//        String currentName = binding.editTextPlaylistName.getText().toString().trim();
+//        // We need a method in Repo to count tracks for a SPECIFIC key
+//        int count = TrackRepository.getTrackCount(this, currentName);
+//        binding.tvTotalSongsInPlaylist.setText(count + " Songs in this Playlist");
+//    }
 
     private void setupButtons() {
         // 1. Scan Folders
@@ -56,15 +69,25 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         binding.btnSave.setOnClickListener(v -> saveAndExit());
     }
 
+    private void LoadOrReloadMusicService()
+    {
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.setAction("LOAD_PLAYLIST");
+        ContextCompat.startForegroundService(this, serviceIntent);
+    }
+
     //region UI Listeners
 
     private void OnClickBtnClearLibrary() {
-        TrackRepository.clearTracks(this);
-        Intent intent = new Intent(this, MusicService.class);
-        intent.setAction("LOAD_PLAYLIST");
-        ContextCompat.startForegroundService(this, intent);
 
-        binding.tvTotalSongsInPlaylist.setText(currentPlaylistSongs.length() + " Songs in this Playlist");
+        String currentName = binding.editTextPlaylistName.getText().toString().trim();
+
+        TrackRepository.clearTracks(this);
+//        TrackRepository.clearTracks(this, currentName);
+
+        LoadOrReloadMusicService();
+
+        binding.tvTotalSongsInPlaylist.setText("0 Songs in this Playlist");
         Toast.makeText(this, "Playlist cleared", Toast.LENGTH_SHORT).show();
 
         //binding.seekBar.setProgress(0);
@@ -153,10 +176,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                                     int finalCount = countAddedTracks;
                                     runOnUiThread(() -> {
                                         Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
-
-                                        Intent serviceIntent = new Intent(this, MusicService.class);
-                                        serviceIntent.setAction("LOAD_PLAYLIST");
-                                        ContextCompat.startForegroundService(this, serviceIntent);
+                                        LoadOrReloadMusicService();
                                     });
                                 }
                             }).start();
@@ -179,10 +199,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                             int countAddedTracks = TrackRepository.saveTracksFromFolder(this, folderUri);
 
                             runOnUiThread(() -> {
-                                Intent serviceIntent = new Intent(this, MusicService.class);
-                                serviceIntent.setAction("LOAD_PLAYLIST");
-                                ContextCompat.startForegroundService(this, serviceIntent);
-
+                                LoadOrReloadMusicService();
                                 Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
                             });
                         } catch (Exception e) {
