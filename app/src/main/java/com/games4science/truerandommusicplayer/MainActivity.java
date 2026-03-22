@@ -2,20 +2,14 @@ package com.games4science.truerandommusicplayer;
 
 import android.Manifest;
 import android.content.ComponentName;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -23,7 +17,8 @@ import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 
-import com.games4science.truerandommusicplayer.data.TrackRepository;
+import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainActivityActionHandler;
+import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainActivityUiController;
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.util.MyUtils;
@@ -46,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] playlists = {"My Library", "Gym Mix", "Work Focus"};
 
+    private MainActivityUiController uiController;
+    private MainActivityActionHandler actionHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,27 +51,21 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Initialize the UI Controller
+        uiController = new MainActivityUiController(this, binding);
+
         requestNotificationPermission();
 
         connectToService();
 
         // Set up the listener for the Playlist Editor button
-        binding.btnPlaylistEditor.setOnClickListener(v -> OnClickBtnPlaylistEditor());
-
-        binding.btnPlayPause.setOnClickListener(v -> OnClickBtnPlayPause());
-        binding.btnNext.setOnClickListener(v -> OnClickBtnNext());
-        binding.btnPrevious.setOnClickListener(v -> OnClickBtnPrevious());
-        binding.btnStop.setOnClickListener(v -> OnClickBtnStop());
+        binding.btnPlaylistEditor.setOnClickListener(v -> actionHandler.OnClickBtnPlaylistEditor());
+        binding.btnPlayPause.setOnClickListener(v -> actionHandler.OnClickBtnPlayPause());
+        binding.btnNext.setOnClickListener(v -> actionHandler.OnClickBtnNext());
+        binding.btnPrevious.setOnClickListener(v -> actionHandler.OnClickBtnPrevious());
+        binding.btnStop.setOnClickListener(v -> actionHandler.OnClickBtnStop());
         binding.seekBar.setOnSeekBarChangeListener(CreateSeekBarListener());
-
-        binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Intent intent = new Intent(this, MusicService.class);
-            intent.setAction("TOGGLE_PURE_RANDOM");
-            intent.putExtra("STATE", isChecked);
-            startService(intent);
-
-            applyMadnessTheme(isChecked); // Triggers the "Madness" UI change
-        });
+        binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> actionHandler.OnTogglePureRandom(isChecked));
 
         binding.volumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -139,16 +131,19 @@ public class MainActivity extends AppCompatActivity {
             try {
                 controller = controllerFuture.get();
 
+                // Now that we have a controller, initialize the Action Handler
+                actionHandler = new MainActivityActionHandler(this, controller, uiController);
+
                 // Add Listener to handle icon changes automatically
                 controller.addListener(new Player.Listener() {
                     @Override
                     public void onIsPlayingChanged(boolean isPlaying) {
-                        updatePlayPauseIcon(isPlaying);
+                        uiController.updatePlayPauseIcon(isPlaying);
                     }
                 });
 
                 // Set initial icon state
-                updatePlayPauseIcon(controller.isPlaying());
+                uiController.updatePlayPauseIcon(controller.isPlaying());
 
                 progressHandler.post(progressRunnable);
 
@@ -156,14 +151,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
-    }
-
-    private void updatePlayPauseIcon(boolean isPlaying) {
-        if (isPlaying) {
-            binding.btnPlayPause.setIconResource(R.drawable.ic_pause);
-        } else {
-            binding.btnPlayPause.setIconResource(R.drawable.ic_play);
-        }
     }
 
     private void requestNotificationPermission() {
@@ -216,8 +203,6 @@ public class MainActivity extends AppCompatActivity {
         binding.spinnerPlaylists.setAdapter(adapter);
     }
 
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -263,49 +248,6 @@ public class MainActivity extends AppCompatActivity {
 
     //region UI Listeners
 
-    private void OnClickBtnPlaylistEditor()
-    {
-        // Create an Intent to transition from this activity to the Manage Activity
-        Intent intent = new Intent(MainActivity.this, ManagePlaylistsActivity.class);
-
-        // Optional: Pass the name of the currently selected playlist
-        // so the editor knows which one to load
-        String selectedPlaylist = binding.spinnerPlaylists.getSelectedItem().toString();
-        intent.putExtra("playlist_name", selectedPlaylist);
-
-        startActivity(intent);
-    }
-
-    private void OnClickBtnPlayPause() {
-        if (controller != null) {
-            if (controller.isPlaying()) {
-                controller.pause();
-            } else {
-                controller.play();
-            }
-        }
-    }
-
-    private void OnClickBtnNext() {
-        if (controller != null) {
-            controller.seekToNextMediaItem();
-        }
-    }
-
-    private void OnClickBtnPrevious(){
-        if (controller != null) {
-            controller.seekToPreviousMediaItem();
-        }
-    }
-
-    private void OnClickBtnStop() {
-        if (controller != null) {
-            controller.stop();
-            controller.seekTo(0);
-            updatePlayPauseIcon(false); // After stop, ensure icon is set to Play
-        }
-    }
-
     private SeekBar.OnSeekBarChangeListener CreateSeekBarListener() {
         return new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -327,62 +269,6 @@ public class MainActivity extends AppCompatActivity {
                 isUserInteractingWithSeekingBar = false; // User stopped dragging
             }
         };
-    }
-
-    //endregion
-
-    //region UI Skin Swapper
-
-    private void applyMadnessTheme(boolean isMadness) {
-        // 1. Define the Madness color (Orange)
-        int madnessColor = ContextCompat.getColor(this, android.R.color.holo_orange_dark);
-
-        // 2. Fetch the "Normal" Primary color from the current theme (Day or Night)
-        TypedValue typedValue = new TypedValue();
-        getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
-        int themePrimaryColor = typedValue.data;
-
-        // 3. Define the state lists
-        ColorStateList madnessList = ColorStateList.valueOf(madnessColor);
-        ColorStateList normalList = ColorStateList.valueOf(themePrimaryColor);
-
-        if (isMadness) {
-            // APPLY MADNESS
-            binding.tvAppTitle.setText(R.string.app_title_madness_mode);
-            binding.tvAppTitle.setTextColor(madnessColor);
-
-            // Update all your buttons from the XML
-            binding.btnPlayPause.setBackgroundTintList(madnessList);
-            binding.btnNext.setBackgroundTintList(madnessList);
-            binding.btnPrevious.setBackgroundTintList(madnessList);
-            binding.btnStop.setBackgroundTintList(madnessList);
-
-            // Make the SeekBar orange too!
-            binding.seekBar.getProgressDrawable().setTint(madnessColor);
-            binding.seekBar.getThumb().setTint(madnessColor);
-
-            binding.volumeSeekBar.getProgressDrawable().setTint(madnessColor);
-            binding.volumeSeekBar.getThumb().setTint(madnessColor);
-        } else {
-            // RESET TO NORMAL (Respects Day/Night)
-            binding.tvAppTitle.setText(R.string.app_title_normal_mode);
-
-            // For the title, we usually want the standard text color
-            getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnBackground, typedValue, true);
-            binding.tvAppTitle.setTextColor(typedValue.data);
-
-            binding.btnPlayPause.setBackgroundTintList(normalList);
-            binding.btnNext.setBackgroundTintList(normalList);
-            binding.btnPrevious.setBackgroundTintList(normalList);
-            binding.btnStop.setBackgroundTintList(normalList);
-
-            // Reset SeekBar to theme primary
-            binding.seekBar.getProgressDrawable().setTint(themePrimaryColor);
-            binding.seekBar.getThumb().setTint(themePrimaryColor);
-
-            binding.volumeSeekBar.getProgressDrawable().setTint(themePrimaryColor);
-            binding.volumeSeekBar.getThumb().setTint(themePrimaryColor);
-        }
     }
 
     //endregion
