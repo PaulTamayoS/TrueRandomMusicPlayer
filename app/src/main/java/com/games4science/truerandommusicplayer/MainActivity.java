@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ListenableFuture<MediaController> controllerFuture;
 
     private Handler progressHandler = new Handler(Looper.getMainLooper());
-    private boolean isUserInteractingWithSeekingBar = false;
+
 
     private String[] playlists = {"My Library", "Gym Mix", "Work Focus"};
     public static boolean playlistModified = false;
@@ -54,9 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the UI Controller
         uiController = new MainActivityUiController(this, binding);
-
         requestNotificationPermission();
-
         connectToService();
 
         // Set up the listener for the Playlist Editor button
@@ -65,63 +63,9 @@ public class MainActivity extends AppCompatActivity {
         binding.btnNext.setOnClickListener(v -> actionHandler.OnClickBtnNext());
         binding.btnPrevious.setOnClickListener(v -> actionHandler.OnClickBtnPrevious());
         binding.btnStop.setOnClickListener(v -> actionHandler.OnClickBtnStop());
-        binding.trackSeekBar.setOnSeekBarChangeListener(CreateSeekBarListener());
         binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> actionHandler.OnTogglePureRandom(isChecked));
-
-        binding.volumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && controller != null) {
-                    // Convert 0-100 to 0.0-1.0
-                    float volume = progress / 100f;
-                    controller.setVolume(volume);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        binding.volumeSeekBar.setProgress(30);
-
-        ReloadDropDownSpinnerPlaylists();
-
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-//                this,
-//                android.R.layout.simple_spinner_item,
-//                playlists
-//        );
-//
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        binding.spinnerPlaylists.setAdapter(adapter);
-
-        binding.spinnerPlaylists.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selected = playlists[position];
-
-                Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
-                // TODO : Logic to tell MusicService to switch JSON keys
-
-
-//                // Trigger the service to load this specific JSON
-//                Intent intent = new Intent(MainActivity.this, MusicService.class);
-//                intent.setAction("LOAD_PLAYLIST");
-//                intent.putExtra("PLAYLIST_NAME", selected);
-//                startService(intent);
-
-
-                //binding.seekBar.setProgress(0);
-                //binding.txtTime.setText( R.string.player_time_zero);
-                //binding.txtTrackTitle.setText(R.string.no_track_playing);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        uiController.ReloadDropDownSpinnerPlaylists(playlists);
+        binding.spinnerPlaylists.setOnItemSelectedListener(CreateSpinnerPlaylistsItemSelectedListener());
     }
 
     private void connectToService() {
@@ -134,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
 
                 // Now that we have a controller, initialize the Action Handler
                 actionHandler = new MainActivityActionHandler(this, controller, uiController);
+
+                binding.trackSeekBar.setOnSeekBarChangeListener(actionHandler.CreateTrackSeekBarListener());
+                binding.volumeSeekBar.setOnSeekBarChangeListener(actionHandler.CreateVolumeSeekBarListener());
+                binding.volumeSeekBar.setProgress(30);
 
                 // Add Listener to handle icon changes automatically
                 controller.addListener(new Player.Listener() {
@@ -190,23 +138,11 @@ public class MainActivity extends AppCompatActivity {
         // TODO: Later, load this array from SharedPreferences/TrackRepository
         // playlists = TrackRepository.getPlaylistNames(this);
 
-
-        ReloadDropDownSpinnerPlaylists();
+        uiController.ReloadDropDownSpinnerPlaylists(playlists);
 
         // Optional: Auto-select the last active playlist
     }
 
-    private void ReloadDropDownSpinnerPlaylists()
-    {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                playlists
-        );
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerPlaylists.setAdapter(adapter);
-    }
 
     @Override
     protected void onDestroy() {
@@ -229,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (duration > 0) {
                     int progress = (int) ((position * 1000) / duration);
-                    if (isUserInteractingWithSeekingBar == false) { // Only update if the user IS NOT touching the bar
+                    if (actionHandler!= null & actionHandler.IsUserInteractingWithTrackSeekingBar() == false) { // Only update if the user IS NOT touching the bar
                         binding.trackSeekBar.setProgress(progress);
                     }
                     binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
@@ -251,30 +187,30 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    //region UI Listeners
-
-    private SeekBar.OnSeekBarChangeListener CreateSeekBarListener() {
-        return new SeekBar.OnSeekBarChangeListener() {
+    public AdapterView.OnItemSelectedListener CreateSpinnerPlaylistsItemSelectedListener() {
+        return new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && controller != null) {
-                    long duration = controller.getDuration();
-                    long newPosition = (duration * progress) / 1000;
-                    controller.seekTo(newPosition);
-                }
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selected = playlists[position];
+
+                Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
+                // TODO : Logic to tell MusicService to switch JSON keys
+
+
+//                // Trigger the service to load this specific JSON
+//                Intent intent = new Intent(MainActivity.this, MusicService.class);
+//                intent.setAction("LOAD_PLAYLIST");
+//                intent.putExtra("PLAYLIST_NAME", selected);
+//                startService(intent);
+
+
+                //binding.seekBar.setProgress(0);
+                //binding.txtTime.setText( R.string.player_time_zero);
+                //binding.txtTrackTitle.setText(R.string.no_track_playing);
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                isUserInteractingWithSeekingBar = true; // User started dragging
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                isUserInteractingWithSeekingBar = false; // User stopped dragging
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         };
     }
-
-    //endregion
 }

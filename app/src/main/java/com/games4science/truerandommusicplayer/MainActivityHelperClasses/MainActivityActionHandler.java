@@ -1,6 +1,8 @@
 package com.games4science.truerandommusicplayer.MainActivityHelperClasses;
 
 import android.content.Intent;
+import android.widget.SeekBar;
+
 import androidx.media3.session.MediaController;
 
 import com.games4science.truerandommusicplayer.MainActivity;
@@ -13,6 +15,7 @@ public class MainActivityActionHandler {
     private final MediaController controller;
     private final MainActivityUiController uiController; //Normally, this should not be here. The MainActivity should give us the data that we need. But for a project this small it should be safe
 
+    private boolean isUserInteractingWithTrackSeekingBar = false;
 
     public MainActivityActionHandler(MainActivity activity, MediaController controller,MainActivityUiController uiController) {
         this.activity = activity;
@@ -66,5 +69,51 @@ public class MainActivityActionHandler {
         activity.startService(intent);
 
         uiController.applyMadnessTheme(isChecked); // Triggers the "Madness" UI change
+    }
+
+    public SeekBar.OnSeekBarChangeListener CreateTrackSeekBarListener() {
+        return new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && controller != null) {
+                    long duration = controller.getDuration();
+                    long newPosition = (duration * progress) / 1000;
+                    controller.seekTo(newPosition);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isUserInteractingWithTrackSeekingBar = true; // User started dragging
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                isUserInteractingWithTrackSeekingBar = false; // User stopped dragging
+            }
+        };
+    }
+
+    public boolean IsUserInteractingWithTrackSeekingBar() {
+        return isUserInteractingWithTrackSeekingBar;
+    }
+
+    public SeekBar.OnSeekBarChangeListener CreateVolumeSeekBarListener() {
+        return new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && controller != null) {
+                    // Convert 0-100 to 0.0-1.0
+                    float volume = progress / 100f;
+                    controller.setVolume(volume);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
     }
 }

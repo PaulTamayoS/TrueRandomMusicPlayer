@@ -3,6 +3,8 @@ package com.games4science.truerandommusicplayer.MainActivityHelperClasses;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.util.TypedValue;
+import android.widget.ArrayAdapter;
+
 import androidx.core.content.ContextCompat;
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
 import com.games4science.truerandommusicplayer.R;
@@ -82,4 +84,16 @@ public class MainActivityUiController {
         return binding.spinnerPlaylists.getSelectedItem().toString();
     }
 
+
+    public void ReloadDropDownSpinnerPlaylists(String[] playlists)
+    {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_spinner_item,
+                playlists
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerPlaylists.setAdapter(adapter);
+    }
 }
