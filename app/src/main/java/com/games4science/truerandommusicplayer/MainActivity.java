@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isUserInteractingWithSeekingBar = false;
 
     private String[] playlists = {"My Library", "Gym Mix", "Work Focus"};
+    public static boolean playlistModified = false;
 
     private MainActivityUiController uiController;
     private MainActivityActionHandler actionHandler;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         binding.btnNext.setOnClickListener(v -> actionHandler.OnClickBtnNext());
         binding.btnPrevious.setOnClickListener(v -> actionHandler.OnClickBtnPrevious());
         binding.btnStop.setOnClickListener(v -> actionHandler.OnClickBtnStop());
-        binding.seekBar.setOnSeekBarChangeListener(CreateSeekBarListener());
+        binding.trackSeekBar.setOnSeekBarChangeListener(CreateSeekBarListener());
         binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> actionHandler.OnTogglePureRandom(isChecked));
 
         binding.volumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -177,8 +178,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // This runs every time you come back from the Editor
-        OnResumeRefreshPlaylistSpinner();
+
+        // Only reload if the flag was set to true by the other Activity
+        if (playlistModified == true) {
+            OnResumeRefreshPlaylistSpinner();
+            playlistModified = false; // Reset the flag so we don't reload again next time
+        }
     }
 
     private void OnResumeRefreshPlaylistSpinner() {
@@ -225,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
                 if (duration > 0) {
                     int progress = (int) ((position * 1000) / duration);
                     if (isUserInteractingWithSeekingBar == false) { // Only update if the user IS NOT touching the bar
-                        binding.seekBar.setProgress(progress);
+                        binding.trackSeekBar.setProgress(progress);
                     }
                     binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
                 }

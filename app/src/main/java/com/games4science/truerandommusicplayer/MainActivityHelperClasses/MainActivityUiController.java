@@ -50,8 +50,8 @@ public class MainActivityUiController {
             binding.btnStop.setBackgroundTintList(madnessList);
 
             // Make the SeekBar orange too!
-            binding.seekBar.getProgressDrawable().setTint(madnessColor);
-            binding.seekBar.getThumb().setTint(madnessColor);
+            binding.trackSeekBar.getProgressDrawable().setTint(madnessColor);
+            binding.trackSeekBar.getThumb().setTint(madnessColor);
 
             binding.volumeSeekBar.getProgressDrawable().setTint(madnessColor);
             binding.volumeSeekBar.getThumb().setTint(madnessColor);
@@ -69,8 +69,8 @@ public class MainActivityUiController {
             binding.btnStop.setBackgroundTintList(normalList);
 
             // Reset SeekBar to theme primary
-            binding.seekBar.getProgressDrawable().setTint(themePrimaryColor);
-            binding.seekBar.getThumb().setTint(themePrimaryColor);
+            binding.trackSeekBar.getProgressDrawable().setTint(themePrimaryColor);
+            binding.trackSeekBar.getThumb().setTint(themePrimaryColor);
 
             binding.volumeSeekBar.getProgressDrawable().setTint(themePrimaryColor);
             binding.volumeSeekBar.getThumb().setTint(themePrimaryColor);

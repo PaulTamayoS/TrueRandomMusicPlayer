@@ -122,6 +122,9 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         // Logic to save to TrackRepository
         // TrackRepository.saveFullPlaylist(this, newName, currentPlaylistSongs);
 
+        // Tell MainActivity that something changed!
+        MainActivity.playlistModified = true;
+
         Toast.makeText(this, "Playlist Saved!", Toast.LENGTH_SHORT).show();
         finish();
     }
