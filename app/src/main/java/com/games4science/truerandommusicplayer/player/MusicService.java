@@ -35,7 +35,7 @@ public class MusicService extends MediaSessionService {
                 .build();
 
         player = new ExoPlayer.Builder(this)
-                .setAudioAttributes(audioAttributes, true) // 'true' enables automatic ducking!
+                .setAudioAttributes(audioAttributes, false) // 'true' enables automatic ducking!
                 .setHandleAudioBecomingNoisy(true) // Pauses on headphone unplug
                 .setWakeMode(C.WAKE_MODE_NETWORK) // Prepares for future API/Network streaming
                 .build();
