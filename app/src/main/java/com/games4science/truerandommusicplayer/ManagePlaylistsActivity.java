@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -63,6 +65,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 //            folderPickerLauncher.launch(intent);
         });
 
+        binding.btnNewPlaylist.setOnClickListener(v -> showCreatePlaylistDialog());
         binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
         binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
         binding.btnCancel.setOnClickListener(v -> finish());
@@ -127,6 +130,24 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Playlist Saved!", Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private void showCreatePlaylistDialog() {
+        EditText input = new EditText(this);
+        input.setHint("e.g., Gym Mix");
+
+        new AlertDialog.Builder(this)
+                .setTitle("New Playlist")
+                .setMessage("Enter a name for your new playlist:")
+                .setView(input)
+                .setPositiveButton("Create", (dialog, which) -> {
+                    String name = input.getText().toString().trim();
+                    if (!name.isEmpty()) {
+                        createNewPlaylist(name);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     //endregion
@@ -214,6 +235,20 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     }).start();
                 }
             });
+
+    private void createNewPlaylist(String name) {
+        // 1. Save an empty list to initialize the key in SharedPreferences
+        TrackRepository.clearTracks(this, name);
+
+        // 2. Refresh your Activity's state
+        this.currentPlaylistName = name;
+        binding.tvCurrentPlaylistName.setText("Editing: " + name);
+
+        // 3. Notify MainActivity that the list of playlists has changed
+        MainActivity.playlistModified = true;
+
+        Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
+    }
 
     //endregion
 }
