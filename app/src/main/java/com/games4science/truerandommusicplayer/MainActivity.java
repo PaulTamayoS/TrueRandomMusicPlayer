@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler progressHandler = new Handler(Looper.getMainLooper());
 
 
-    private String[] playlists = {"My Library", "Gym Mix", "Work Focus"};
+    private String[] playlists = {"My Library"};
     public static boolean playlistModified = false;
 
     private MainActivityUiController uiController;
