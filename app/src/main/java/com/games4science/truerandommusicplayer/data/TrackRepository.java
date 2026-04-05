@@ -19,12 +19,37 @@ import java.util.List;
 public class TrackRepository {
 
     private static final String PREFS = "tracks_repo";
-    private static final String KEY_JSON_TRACKS = "json_tracks"; // Store everything in one JSON string
+    //private static final String KEY_JSON_TRACKS = "json_tracks"; // Store everything in one JSON string
+
+    /**
+     * Gets all available playlist names for the Spinner
+     */
+    public static List<String> getAllPlaylistNames(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        // Get all keys (playlist names)
+        List<String> names = new ArrayList<>(prefs.getAll().keySet());
+
+        // Ensure "My Library" always exists as a default
+        if (!names.contains("My Library")) {
+            names.add(0, "My Library"); // Add to the start
+        } else {
+            // Optional: Move it to the start if it exists elsewhere
+            names.remove("My Library");
+            names.add(0, "My Library");
+        }
+        return names;
+    }
+
+    public static void initializeEmptyPlaylist(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        // Instead of remove(), we put an empty array string
+        prefs.edit().putString(playlistName, "[]").apply();
+    }
 
     /**
      * Used for SINGLE file selection (User picked the file directly)
      */
-    public static void saveTrack(Context context, Uri uri) {
+    public static void saveTrack(Context context, String playlistName, Uri uri) {
         try {
             // Only persist if the URI supports it (picked via ACTION_OPEN_DOCUMENT)
             try {
@@ -35,7 +60,7 @@ public class TrackRepository {
             }
 
             JSONObject trackJson = getTrackMetadata(context, uri);
-            saveToPrefs(context, trackJson);
+            saveToPrefs(context, playlistName, trackJson);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,7 +70,7 @@ public class TrackRepository {
     /**
      * Used for FOLDER selection (User picked the folder)
      */
-    public static int saveTracksFromFolder(Context context, Uri folderUri) {
+    public static int saveTracksFromFolder(Context context,  String playlistName, Uri folderUri) {
         DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
         if (rootFolder == null || !rootFolder.isDirectory()) return 0;
 
@@ -53,7 +78,7 @@ public class TrackRepository {
         int count = scanDirectoryRecursive(context, rootFolder, allTracks);
 
         // Save everything ONCE at the very end
-        saveBatchToPrefs(context, allTracks);
+        saveBatchToPrefs(context, playlistName, allTracks);
         return count;
     }
 
@@ -106,40 +131,39 @@ public class TrackRepository {
         return trackJson;
     }
 
-    private static void saveToPrefs(Context context, JSONObject trackJson) throws Exception {
+    private static void saveToPrefs(Context context, String playlistName, JSONObject trackJson) throws Exception {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String jsonString = prefs.getString(KEY_JSON_TRACKS, "[]");
-        JSONArray array = new JSONArray(jsonString);
-        array.put(trackJson);
-        prefs.edit().putString(KEY_JSON_TRACKS, array.toString()).commit();
+        JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
+        existing.put(trackJson);
+        prefs.edit().putString(playlistName, existing.toString()).commit();
     }
 
-    private static void saveBatchToPrefs(Context context, JSONArray newBatch) {
+    private static void saveBatchToPrefs(Context context, String playlistName, JSONArray newBatch) {
         try {
             SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            JSONArray existing = new JSONArray(prefs.getString(KEY_JSON_TRACKS, "[]"));
+            JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
 
             for (int i = 0; i < newBatch.length(); i++) {
                 existing.put(newBatch.get(i));
             }
 
-            prefs.edit().putString(KEY_JSON_TRACKS, existing.toString()).commit();
+            prefs.edit().putString(playlistName, existing.toString()).commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void clearTracks(Context context) {
+    public static void clearTracks(Context context, String playlistName) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit().remove(KEY_JSON_TRACKS).commit();
+        prefs.edit().remove(playlistName).commit();
     }
 
-    public static List<MediaItem> getTracks(Context context) {
+    public static List<MediaItem> getTracks(Context context, String playlistName) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         List<MediaItem> listOutput = new ArrayList<>();
 
         try {
-            String jsonString = prefs.getString(KEY_JSON_TRACKS, "[]");
+            String jsonString = prefs.getString(playlistName, "[]");
             JSONArray array = new JSONArray(jsonString);
 
             for (int i = 0; i < array.length(); i++) {
@@ -161,5 +185,16 @@ public class TrackRepository {
             e.printStackTrace();
         }
         return listOutput;
+    }
+
+    public static int getTracksCount(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        try {
+            String jsonString = prefs.getString(playlistName, "[]");
+            JSONArray array = new JSONArray(jsonString);
+            return array.length();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

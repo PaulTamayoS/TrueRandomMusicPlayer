@@ -46,17 +46,17 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         }
 
         binding.editTextPlaylistName.setText(currentPlaylistName);
-//        updateSongCountUI();
+        updateSongCountUI();
 
         setupButtons();
     }
 
-//    private void updateSongCountUI() {
-//        String currentName = binding.editTextPlaylistName.getText().toString().trim();
-//        // We need a method in Repo to count tracks for a SPECIFIC key
-//        int count = TrackRepository.getTrackCount(this, currentName);
-//        binding.tvTotalSongsInPlaylist.setText(count + " Songs in this Playlist");
-//    }
+    private void updateSongCountUI() {
+        String currentName = binding.editTextPlaylistName.getText().toString().trim();
+        // We need a method in Repo to count tracks for a SPECIFIC key
+        int count = TrackRepository.getTracksCount(this, currentName);
+        binding.tvTotalSongsInPlaylist.setText(count + " Songs in this Playlist");
+    }
 
     private void setupButtons() {
         // 1. Scan Folders
