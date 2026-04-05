@@ -22,6 +22,7 @@ import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainAct
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.util.MyUtils;
+import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import android.os.Handler;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         binding.btnPrevious.setOnClickListener(v -> actionHandler.OnClickBtnPrevious());
         binding.btnStop.setOnClickListener(v -> actionHandler.OnClickBtnStop());
         binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> actionHandler.OnTogglePureRandom(isChecked));
-        uiController.ReloadDropDownSpinnerPlaylists(playlists);
+        OnResumeRefreshPlaylistSpinner();
         binding.spinnerPlaylists.setOnItemSelectedListener(CreateSpinnerPlaylistsItemSelectedListener());
     }
 
@@ -135,12 +136,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void OnResumeRefreshPlaylistSpinner() {
-        // TODO: Later, load this array from SharedPreferences/TrackRepository
-        // playlists = TrackRepository.getPlaylistNames(this);
+
+        java.util.List<String> namesFromRepo = TrackRepository.getAllPlaylistNames(this);
+
+        // Convert List to Array for the Spinner
+        playlists = namesFromRepo.toArray(new String[0]);
 
         uiController.ReloadDropDownSpinnerPlaylists(playlists);
-
-        // Optional: Auto-select the last active playlist
     }
 
 
@@ -192,21 +194,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selected = playlists[position];
-
                 Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
-                // TODO : Logic to tell MusicService to switch JSON keys
 
+                // Tell the MusicService to switch JSON keys and reload
+                android.content.Intent intent = new android.content.Intent(MainActivity.this, MusicService.class);
+                intent.setAction("LOAD_PLAYLIST");
+                intent.putExtra("PLAYLIST_NAME", selected);
+                startService(intent);
 
-//                // Trigger the service to load this specific JSON
-//                Intent intent = new Intent(MainActivity.this, MusicService.class);
-//                intent.setAction("LOAD_PLAYLIST");
-//                intent.putExtra("PLAYLIST_NAME", selected);
-//                startService(intent);
-
-
-                //binding.seekBar.setProgress(0);
-                //binding.txtTime.setText( R.string.player_time_zero);
-                //binding.txtTrackTitle.setText(R.string.no_track_playing);
+                //Reset UI display while loading
+                binding.trackSeekBar.setProgress(0);
+                binding.txtTime.setText( R.string.player_time_zero);
+                binding.txtTrackTitle.setText("Loading " + selected + "...");
             }
 
             @Override

@@ -51,7 +51,7 @@ public class MusicService extends MediaSessionService {
         });
 
         mediaSession = new MediaSession.Builder(this, player).build();
-        loadPlaylist(false); // Load but don't force play immediately on boot
+        loadPlaylist(false, "My Library"); // Load but don't force play immediately on boot //TODO: save and get the last played list
     }
 
     private void handleMediaItemTransition(int reason) {
@@ -76,11 +76,16 @@ public class MusicService extends MediaSessionService {
         }
     }
 
-    private void loadPlaylist(boolean playImmediately) {
-        List<MediaItem> tracks = TrackRepository.getTracks(this);
+    private void loadPlaylist(boolean playImmediately, String playlistName) {
+        // If no name is provided (like on initial boot), default to "My Library"
+        if (playlistName == null || playlistName.isEmpty()) {
+            playlistName = "My Library";
+        }
+
+        List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);
 
         if (tracks == null || tracks.isEmpty()) {
-            Toast.makeText(this, "No Tracks into the current list !!!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
+            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
             player.stop();
             player.clearMediaItems();
             return;
@@ -104,7 +109,8 @@ public class MusicService extends MediaSessionService {
         if (intent != null) {
             String action = intent.getAction();
             if ("LOAD_PLAYLIST".equals(action)) {
-                loadPlaylist(true);
+                String playlistName = intent.getStringExtra("PLAYLIST_NAME");
+                loadPlaylist(true, playlistName);
             } else if ("TOGGLE_PURE_RANDOM".equals(action)) {
                 isPureRandomEnabled = intent.getBooleanExtra("STATE", false);
             }

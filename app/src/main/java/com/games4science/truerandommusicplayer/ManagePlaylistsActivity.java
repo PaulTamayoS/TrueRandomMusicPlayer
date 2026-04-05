@@ -39,7 +39,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         currentPlaylistName = getIntent().getStringExtra("playlist_name");
 
         if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
-            currentPlaylistName = "New Library";
+            currentPlaylistName = "My Library";
         }
         else {
             //loadExistingPlaylistData(originalName);
@@ -59,12 +59,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-        // 1. Scan Folders
-        binding.btnAddMusic.setOnClickListener(v -> {
-//            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-//            folderPickerLauncher.launch(intent);
-        });
-
         binding.btnNewPlaylist.setOnClickListener(v -> showCreatePlaylistDialog());
         binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
         binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
@@ -74,8 +68,17 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private void LoadOrReloadMusicService()
     {
+        // 1. Get the name of the playlist being edited
+        String nameToLoad = binding.editTextPlaylistName.getText().toString().trim();
+
+        // Fallback if empty
+        if (nameToLoad.isEmpty()) {
+            nameToLoad = currentPlaylistName;
+        }
+
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction("LOAD_PLAYLIST");
+        serviceIntent.putExtra("PLAYLIST_NAME", nameToLoad);
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 
@@ -87,7 +90,16 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         TrackRepository.clearTracks(this, currentName);
 
-        LoadOrReloadMusicService();
+        //We need to reload the music service if the playlist currently playing is modified
+        if (currentPlaylistName != null && currentPlaylistName.isEmpty() == false)
+        {
+            if (currentPlaylistName.equals(currentName))
+            {
+                LoadOrReloadMusicService();
+            }
+        }
+
+
 
         binding.tvTotalSongsInPlaylist.setText("0 Songs in this Playlist");
         Toast.makeText(this, "Playlist cleared", Toast.LENGTH_SHORT).show();
