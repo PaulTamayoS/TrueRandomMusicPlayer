@@ -27,7 +27,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private ActivityManagePlaylistsBinding binding;
     private JSONArray currentPlaylistSongs = new JSONArray();
-    private String originalName = ""; // Used if we are editing an existing list
+    private String currentPlaylistName = ""; // Used if we are editing an existing list
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,16 +36,16 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Check if we are EDITING an existing playlist
-        originalName = getIntent().getStringExtra("playlist_name");
+        currentPlaylistName = getIntent().getStringExtra("playlist_name");
 
-        if (originalName == null || originalName.isEmpty()) {
-            originalName = "New Library";
+        if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
+            currentPlaylistName = "New Library";
         }
         else {
             //loadExistingPlaylistData(originalName);
         }
 
-        binding.editTextPlaylistName.setText(originalName);
+        binding.editTextPlaylistName.setText(currentPlaylistName);
 //        updateSongCountUI();
 
         setupButtons();
@@ -85,8 +85,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         String currentName = binding.editTextPlaylistName.getText().toString().trim();
 
-        TrackRepository.clearTracks(this);
-//        TrackRepository.clearTracks(this, currentName);
+        TrackRepository.clearTracks(this, currentName);
 
         LoadOrReloadMusicService();
 
@@ -124,6 +123,9 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         // Logic to save to TrackRepository
         // TrackRepository.saveFullPlaylist(this, newName, currentPlaylistSongs);
+
+        // If the user typed a new name in the box, we should treat that as the playlist name
+        this.currentPlaylistName = newName;
 
         // Tell MainActivity that something changed!
         MainActivity.playlistModified = true;
@@ -183,14 +185,14 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                                 // 1. Single file selection
                                 if (data.getData() != null) {
-                                    TrackRepository.saveTrack(this, data.getData());
+                                    TrackRepository.saveTrack(this, currentPlaylistName, data.getData());
                                     countAddedTracks++;
                                 }
                                 // 2. Multiple file selection
                                 else if (data.getClipData() != null) {
                                     for (int i = 0; i < data.getClipData().getItemCount(); i++) {
                                         Uri uri = data.getClipData().getItemAt(i).getUri();
-                                        TrackRepository.saveTrack(this, uri);
+                                        TrackRepository.saveTrack(this, currentPlaylistName, uri);
                                         countAddedTracks++;
                                     }
                                 }
@@ -220,10 +222,11 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     new Thread(() -> {
                         try {
                             // The heavy lifting happens here
-                            int countAddedTracks = TrackRepository.saveTracksFromFolder(this, folderUri);
+                            int countAddedTracks = TrackRepository.saveTracksFromFolder(this, currentPlaylistName, folderUri);
 
                             runOnUiThread(() -> {
                                 LoadOrReloadMusicService();
+                                binding.tvTotalSongsInPlaylist.setText(countAddedTracks + " Tracks in this Playlist");
                                 Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
                             });
                         } catch (Exception e) {
@@ -237,15 +240,25 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             });
 
     private void createNewPlaylist(String name) {
-        // 1. Save an empty list to initialize the key in SharedPreferences
-        TrackRepository.clearTracks(this, name);
 
-        // 2. Refresh your Activity's state
+        java.util.List<String> existingNames = TrackRepository.getAllPlaylistNames(this);
+
+        if (existingNames.contains(name)) {
+            Toast.makeText(this, "Playlist '" + name + "' already exists!", Toast.LENGTH_SHORT).show();
+            // Just switch to it instead of clearing it
+            this.currentPlaylistName = name;
+            binding.editTextPlaylistName.setText(name);
+            return;
+        }
+
+        TrackRepository.initializeEmptyPlaylist(this, name);
+
         this.currentPlaylistName = name;
-        binding.tvCurrentPlaylistName.setText("Editing: " + name);
-
-        // 3. Notify MainActivity that the list of playlists has changed
+        binding.editTextPlaylistName.setText(name);
         MainActivity.playlistModified = true;
+
+        // Refresh the UI to show 0 tracks
+        binding.tvTotalSongsInPlaylist.setText("0 Songs in this Playlist");
 
         Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
     }
