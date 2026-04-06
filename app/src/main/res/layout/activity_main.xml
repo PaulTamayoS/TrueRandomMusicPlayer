@@ -51,19 +51,8 @@
           android:layout_height="wrap_content"
           android:text="Playlist Editor"
           app:icon="@android:drawable/ic_menu_edit"
-          android:layout_marginTop="8dp"/>
-
-      <!-- Optional: Status / instructions -->
-    <TextView
-        android:id="@+id/tvInstructions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Playlist has XX Songs"
-        android:textColor="?attr/colorOnBackground"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="center"/>
+          android:layout_marginTop="8dp"
+          android:layout_marginBottom="24dp"/>
 
     <TextView
         android:id="@+id/txtTrackTitle"
@@ -72,7 +61,8 @@
         android:text="@string/no_track_playing"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:layout_marginTop="12dp"/>
 
     <SeekBar
         android:id="@+id/trackSeekBar"
