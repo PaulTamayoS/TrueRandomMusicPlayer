@@ -51,7 +51,6 @@ public class MusicService extends MediaSessionService {
         });
 
         mediaSession = new MediaSession.Builder(this, player).build();
-        loadPlaylist("My Library"); //TODO: save and get the last played list
     }
 
     @Override
@@ -127,15 +126,13 @@ public class MusicService extends MediaSessionService {
         List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);
 
         if (tracks == null || tracks.isEmpty()) {
-            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
+            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show();
             player.stop();
             player.clearMediaItems();
             return;
         }
 
         Collections.shuffle(tracks); // Shuffle creates a Light Random
-
-        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
 
         // Clear and update the player
         player.setMediaItems(tracks);

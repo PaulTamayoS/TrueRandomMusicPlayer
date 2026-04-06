@@ -7,15 +7,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.databinding.ActivityManagePlaylistsBinding;
@@ -26,7 +22,6 @@ import org.json.JSONArray;
 public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private ActivityManagePlaylistsBinding binding;
-    private JSONArray currentPlaylistSongs = new JSONArray();
     private String currentPlaylistName = ""; // Used if we are editing an existing list
 
     @Override
@@ -144,7 +139,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private void showCreatePlaylistDialog() {
         EditText input = new EditText(this);
-        input.setHint("e.g., Gym Mix");
+        input.setHint("e.g., New Mix");
 
         new AlertDialog.Builder(this)
                 .setTitle("New Playlist")
@@ -236,7 +231,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                             runOnUiThread(() -> {
                                 LoadOrReloadMusicService();
                                 updateSongCountUI();
-                                Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Scan complete! Total tracks added = " + countAddedTracks, Toast.LENGTH_SHORT).show();
                             });
                         } catch (Exception e) {
                             e.printStackTrace();
