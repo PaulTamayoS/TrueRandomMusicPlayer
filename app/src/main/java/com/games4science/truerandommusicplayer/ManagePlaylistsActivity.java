@@ -79,22 +79,31 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     //region UI Listeners
 
     private void OnClickBtnClearLibrary() {
-
-        //TODO Popup to confirm that deleting cant be unmade.
-
         String currentName = binding.editTextPlaylistName.getText().toString().trim();
-        TrackRepository.clearTracks(this, currentName);
 
-        //We need to reload the music service if the playlist currently playing is modified
-        if (currentPlaylistName != null && currentPlaylistName.isEmpty() == false)
-        {
-            if (currentPlaylistName.equals(currentName))
-            {
+        // Create the confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Clear Playlist")
+                .setMessage("Are you sure you want to remove all tracks from '" + currentName + "'? This cannot be undone, and will delete the playlist if no tracks are added.")
+                .setPositiveButton("Clear All", (dialog, which) -> {
+                    // This code only runs if the user clicks "Clear All"
+                    executeClearLibrary(currentName);
+                })
+                .setNegativeButton("Cancel", null) // Does nothing and closes dialog
+                .show();
+    }
+
+    private void executeClearLibrary(String nameToClear) {
+        TrackRepository.clearTracks(this, nameToClear);
+
+        // We need to reload the music service if the playlist currently playing is modified
+        if (currentPlaylistName != null && currentPlaylistName.isEmpty() == false) {
+            if (currentPlaylistName.equals(nameToClear)) {
                 LoadOrReloadMusicService();
             }
         }
 
-        binding.tvTotalSongsInPlaylist.setText("0 Songs in this Playlist");
+        updateSongCountUI(); // Use your helper to refresh the text
         Toast.makeText(this, "Playlist cleared", Toast.LENGTH_SHORT).show();
 
         MainActivity.playlistModified = true;
