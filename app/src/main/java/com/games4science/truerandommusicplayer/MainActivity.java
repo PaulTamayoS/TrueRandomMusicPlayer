@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (duration > 0) {
                     int progress = (int) ((position * 1000) / duration);
-                    if (actionHandler!= null & actionHandler.IsUserInteractingWithTrackSeekingBar() == false) { // Only update if the user IS NOT touching the bar
+                    if (actionHandler!= null && actionHandler.IsUserInteractingWithTrackSeekingBar() == false) { // Only update if the user IS NOT touching the bar
                         binding.trackSeekBar.setProgress(progress);
                     }
                     binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
@@ -181,6 +181,9 @@ public class MainActivity extends AppCompatActivity {
                     int currentIdx = controller.getCurrentMediaItemIndex() + 1;
                     int total = controller.getMediaItemCount();
                     binding.txtTrackTitle.setText(artist +" - " + title + " (" + currentIdx + "/" + total + ")");
+                }
+                else if (controller.getMediaItemCount() == 0) {
+                    binding.txtTrackTitle.setText("Playlist is empty");
                 }
             }
             progressHandler.postDelayed(this, 500);
