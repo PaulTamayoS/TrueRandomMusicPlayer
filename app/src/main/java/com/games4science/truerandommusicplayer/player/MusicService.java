@@ -51,57 +51,7 @@ public class MusicService extends MediaSessionService {
         });
 
         mediaSession = new MediaSession.Builder(this, player).build();
-        loadPlaylist(false, "My Library"); // Load but don't force play immediately on boot //TODO: save and get the last played list
-    }
-
-    private void handleMediaItemTransition(int reason) {
-        if (isPureRandomEnabled == true) {
-
-            // 1. If we are already in the middle of a random jump, STOP here.
-            if (isSearchingRandomTrack) {
-                isSearchingRandomTrack = false; // Reset for the next time
-                return;
-            }
-
-            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || // MEDIA_ITEM_TRANSITION_REASON_AUTO: means the previous song just finished
-                reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) // MEDIA_ITEM_TRANSITION_REASON_SEEK: User clicked Next or Previous
-            {
-                int totalTracks = player.getMediaItemCount();
-                if (totalTracks > 1) {
-                    int nextRandomIndex = (int) (Math.random() * totalTracks);
-                    isSearchingRandomTrack = true;
-                    player.seekTo(nextRandomIndex, 0);
-                }
-            }
-        }
-    }
-
-    private void loadPlaylist(boolean playImmediately, String playlistName) {
-        // If no name is provided (like on initial boot), default to "My Library"
-        if (playlistName == null || playlistName.isEmpty()) {
-            playlistName = "My Library";
-        }
-
-        List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);
-
-        if (tracks == null || tracks.isEmpty()) {
-            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
-            player.stop();
-            player.clearMediaItems();
-            return;
-        }
-
-        Collections.shuffle(tracks); // Shuffle creates a Light Random
-
-        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
-
-        // Clear and update the player
-        player.setMediaItems(tracks);
-        player.prepare();
-
-        if (playImmediately) {
-            player.play();
-        }
+        loadPlaylist("My Library"); //TODO: save and get the last played list
     }
 
     @Override
@@ -110,7 +60,7 @@ public class MusicService extends MediaSessionService {
             String action = intent.getAction();
             if ("LOAD_PLAYLIST".equals(action)) {
                 String playlistName = intent.getStringExtra("PLAYLIST_NAME");
-                loadPlaylist(true, playlistName);
+                loadPlaylist(playlistName);
             } else if ("TOGGLE_PURE_RANDOM".equals(action)) {
                 isPureRandomEnabled = intent.getBooleanExtra("STATE", false);
             }
@@ -144,5 +94,51 @@ public class MusicService extends MediaSessionService {
         }
 
         super.onDestroy();
+    }
+
+    private void handleMediaItemTransition(int reason) {
+        if (isPureRandomEnabled == true) {
+
+            // 1. If we are already in the middle of a random jump, STOP here.
+            if (isSearchingRandomTrack) {
+                isSearchingRandomTrack = false; // Reset for the next time
+                return;
+            }
+
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || // MEDIA_ITEM_TRANSITION_REASON_AUTO: means the previous song just finished
+                    reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) // MEDIA_ITEM_TRANSITION_REASON_SEEK: User clicked Next or Previous
+            {
+                int totalTracks = player.getMediaItemCount();
+                if (totalTracks > 1) {
+                    int nextRandomIndex = (int) (Math.random() * totalTracks);
+                    isSearchingRandomTrack = true;
+                    player.seekTo(nextRandomIndex, 0);
+                }
+            }
+        }
+    }
+
+    private void loadPlaylist(String playlistName) {
+        // If no name is provided (like on initial boot), default to "My Library"
+        if (playlistName == null || playlistName.isEmpty()) {
+            playlistName = "My Library";
+        }
+
+        List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);
+
+        if (tracks == null || tracks.isEmpty()) {
+            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
+            player.stop();
+            player.clearMediaItems();
+            return;
+        }
+
+        Collections.shuffle(tracks); // Shuffle creates a Light Random
+
+        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
+
+        // Clear and update the player
+        player.setMediaItems(tracks);
+        player.prepare();
     }
 }
