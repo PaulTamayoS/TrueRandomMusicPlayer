@@ -194,4 +194,17 @@ public class TrackRepository {
             return 0;
         }
     }
+
+    public static void renamePlaylist(Context context, String oldName, String newName) {
+        if (oldName.equals(newName))
+            return;
+
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String data = prefs.getString(oldName, "[]");
+
+        prefs.edit()
+                .putString(newName, data) // Copy data to new key
+                .remove(oldName)          // Delete old key
+                .apply();
+    }
 }
