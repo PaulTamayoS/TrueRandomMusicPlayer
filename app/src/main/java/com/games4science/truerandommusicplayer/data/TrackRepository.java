@@ -19,7 +19,6 @@ import java.util.List;
 public class TrackRepository {
 
     private static final String PREFS = "tracks_repo";
-    //private static final String KEY_JSON_TRACKS = "json_tracks"; // Store everything in one JSON string
 
     /**
      * Gets all available playlist names for the Spinner
@@ -42,8 +41,7 @@ public class TrackRepository {
 
     public static void initializeEmptyPlaylist(Context context, String playlistName) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        // Instead of remove(), we put an empty array string
-        prefs.edit().putString(playlistName, "[]").apply();
+        prefs.edit().putString(playlistName, "[]").apply(); // we put an empty array string
     }
 
     /**
@@ -105,7 +103,6 @@ public class TrackRepository {
         return addedCount;
     }
 
-    // --- HELPER METHODS TO CLEAN UP CODE ---
     private static JSONObject getTrackMetadata(Context context, Uri uri) throws Exception {
         String title = "Unknown Song";
         String artist = "Unknown Artist";

@@ -53,7 +53,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private void updateSongCountUI() {
         String currentName = binding.editTextPlaylistName.getText().toString().trim();
-        // We need a method in Repo to count tracks for a SPECIFIC key
         int count = TrackRepository.getTracksCount(this, currentName);
         binding.tvTotalSongsInPlaylist.setText(count + " Songs in this Playlist");
     }
@@ -86,8 +85,9 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private void OnClickBtnClearLibrary() {
 
-        String currentName = binding.editTextPlaylistName.getText().toString().trim();
+        //TODO Popup to confirm that deleting cant be unmade.
 
+        String currentName = binding.editTextPlaylistName.getText().toString().trim();
         TrackRepository.clearTracks(this, currentName);
 
         //We need to reload the music service if the playlist currently playing is modified
@@ -99,14 +99,10 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             }
         }
 
-
-
         binding.tvTotalSongsInPlaylist.setText("0 Songs in this Playlist");
         Toast.makeText(this, "Playlist cleared", Toast.LENGTH_SHORT).show();
 
-        //binding.seekBar.setProgress(0);
-        //binding.txtTime.setText( R.string.player_time_zero);
-        //binding.txtTrackTitle.setText(R.string.no_track_playing);
+        MainActivity.playlistModified = true;
     }
 
     private void openPicker(View v) {
@@ -215,6 +211,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                                     runOnUiThread(() -> {
                                         Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
                                         LoadOrReloadMusicService();
+                                        updateSongCountUI();
                                     });
                                 }
                             }).start();
@@ -238,7 +235,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                             runOnUiThread(() -> {
                                 LoadOrReloadMusicService();
-                                binding.tvTotalSongsInPlaylist.setText(countAddedTracks + " Tracks in this Playlist");
+                                updateSongCountUI();
                                 Toast.makeText(this, "Tracks added! Total = " + countAddedTracks, Toast.LENGTH_SHORT).show();
                             });
                         } catch (Exception e) {
@@ -269,8 +266,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         binding.editTextPlaylistName.setText(name);
         MainActivity.playlistModified = true;
 
-        // Refresh the UI to show 0 tracks
-        binding.tvTotalSongsInPlaylist.setText("0 Songs in this Playlist");
+        updateSongCountUI(); // Refresh the UI to show 0 tracks
 
         Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
     }
