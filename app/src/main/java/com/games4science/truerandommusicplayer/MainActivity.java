@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] playlists = {"My Library"};
     public static boolean playlistModified = false;
+    private boolean isSpinnerTouched = false;
+    private boolean isControllerSuccessfullyConnected = false;
 
     private MainActivityUiController uiController;
     private MainActivityActionHandler actionHandler;
@@ -65,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
         binding.switchPureRandom.setOnCheckedChangeListener((buttonView, isChecked) -> actionHandler.OnTogglePureRandom(isChecked));
         OnResumeRefreshPlaylistSpinner();
         binding.spinnerPlaylists.setOnItemSelectedListener(CreateSpinnerPlaylistsItemSelectedListener());
+
+        binding.spinnerPlaylists.setOnTouchListener((v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                isSpinnerTouched = true;
+            }
+            return false; // Return false so the spinner still opens normally
+        });
     }
 
     private void connectToService() {
@@ -74,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         controllerFuture.addListener(() -> {
             try {
                 controller = controllerFuture.get();
+                isControllerSuccessfullyConnected = true; // Flag the connection is ready
 
                 // Now that we have a controller, initialize the Action Handler
                 actionHandler = new MainActivityActionHandler(this, controller, uiController);
@@ -92,6 +102,12 @@ public class MainActivity extends AppCompatActivity {
 
                 // Set initial icon state
                 uiController.updatePlayPauseIcon(controller.isPlaying());
+
+                // If the service has no tracks, it means we just booted and need to load the first playlist
+                if (controller.getMediaItemCount() == 0) {
+                    String initialPlaylist = binding.spinnerPlaylists.getSelectedItem().toString();
+                    triggerPlaylistLoad(initialPlaylist);
+                }
 
                 progressHandler.post(progressRunnable);
 
@@ -134,15 +150,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void OnResumeRefreshPlaylistSpinner() {
-
         java.util.List<String> namesFromRepo = TrackRepository.getAllPlaylistNames(this);
-
-        // Convert List to Array for the Spinner
         playlists = namesFromRepo.toArray(new String[0]);
-
         uiController.ReloadDropDownSpinnerPlaylists(playlists);
-    }
 
+        // Get the last known playlist name
+        String lastSaved = getSharedPreferences("player_prefs", MODE_PRIVATE).getString("last_playlist", "My Library");
+
+        // Update the Spinner selection to match
+        for (int i = 0; i < playlists.length; i++) {
+            if (playlists[i].equals(lastSaved)) {
+                binding.spinnerPlaylists.setSelection(i);
+                break;
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {
@@ -184,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (controller.getMediaItemCount() == 0) {
                     binding.txtTrackTitle.setText("Playlist is empty");
+                } else {
+                    binding.txtTrackTitle.setText("Preparing...");// Service is connected but still preparing the first track
                 }
             }
             progressHandler.postDelayed(this, 500);
@@ -194,23 +218,46 @@ public class MainActivity extends AppCompatActivity {
         return new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
                 String selected = playlists[position];
-                Toast.makeText(MainActivity.this, "Changing Playlist to : " + selected, Toast.LENGTH_SHORT).show();
 
-                // Tell the MusicService to switch JSON keys and reload
-                android.content.Intent intent = new android.content.Intent(MainActivity.this, MusicService.class);
-                intent.setAction("LOAD_PLAYLIST");
-                intent.putExtra("PLAYLIST_NAME", selected);
-                startService(intent);
+                // 1. If we aren't connected yet, just sync the variable and wait.
+                // This prevents the "Auto-Selection" on boot from triggering a load.
+                if (!isControllerSuccessfullyConnected) {
+                    return;
+                }
 
-                //Reset UI display while loading
-                binding.trackSeekBar.setProgress(0);
-                binding.txtTime.setText( R.string.player_time_zero);
-                binding.txtTrackTitle.setText("Loading " + selected + "...");
+                if (isSpinnerTouched == false){
+                    return;
+                }
+
+                isSpinnerTouched = false;
+                triggerPlaylistLoad(selected);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         };
+    }
+
+    private void triggerPlaylistLoad(String playlistName) {
+        Toast.makeText(MainActivity.this, "Changing Playlist to : " + playlistName, Toast.LENGTH_SHORT).show();
+
+        // Save to disk so we remember even if the app process dies
+        getSharedPreferences("player_prefs", MODE_PRIVATE)
+                .edit()
+                .putString("last_playlist", playlistName)
+                .apply();
+
+        // Tell the MusicService to switch JSON keys and reload
+        android.content.Intent intent = new android.content.Intent(MainActivity.this, MusicService.class);
+        intent.setAction("LOAD_PLAYLIST");
+        intent.putExtra("PLAYLIST_NAME", playlistName);
+        startService(intent);
+
+        //Reset UI display while loading
+        binding.trackSeekBar.setProgress(0);
+        binding.txtTime.setText( R.string.player_time_zero);
+        binding.txtTrackTitle.setText("Loading " + playlistName + "...");
     }
 }
