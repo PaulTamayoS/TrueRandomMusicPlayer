@@ -37,7 +37,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             currentPlaylistName = "My Library";
         }
         else {
-            //loadExistingPlaylistData(originalName);
+            // TODO: Load the list of tracks from TrackRepository and populate a RecyclerView here for individual deletion/viewing
         }
 
         binding.editTextPlaylistName.setText(currentPlaylistName);
@@ -56,8 +56,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         binding.btnNewPlaylist.setOnClickListener(v -> showCreatePlaylistDialog());
         binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
         binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
-        binding.btnCancel.setOnClickListener(v -> finish());
-        binding.btnSave.setOnClickListener(v -> saveAndExit());
+        binding.btnSave.setOnClickListener(v -> handleDoneAndExit());
     }
 
     private void LoadOrReloadMusicService()
@@ -125,7 +124,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         popup.show();
     }
 
-    private void saveAndExit() {
+    private void handleDoneAndExit() {
         String newName = binding.editTextPlaylistName.getText().toString().trim();
 
         if (newName.isEmpty()) {
@@ -133,16 +132,14 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             return;
         }
 
-        // Logic to save to TrackRepository
-        // TrackRepository.saveFullPlaylist(this, newName, currentPlaylistSongs);
+        // If the user changed the name in the EditText, perform a rename in storage
+        if (newName.equals(currentPlaylistName) == false) {
+            TrackRepository.renamePlaylist(this, currentPlaylistName, newName);
+            currentPlaylistName = newName;
+            MainActivity.playlistModified = true; // Tell MainActivity that something changed!
+        }
 
-        // If the user typed a new name in the box, we should treat that as the playlist name
-        this.currentPlaylistName = newName;
-
-        // Tell MainActivity that something changed!
-        MainActivity.playlistModified = true;
-
-        Toast.makeText(this, "Playlist Saved!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
         finish();
     }
 
@@ -195,16 +192,21 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                             new Thread(() -> {
                                 int countAddedTracks = 0;
 
+                                String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
+                                if (nameToSaveTo.isEmpty()) {
+                                    nameToSaveTo = currentPlaylistName;
+                                }
+
                                 // 1. Single file selection
                                 if (data.getData() != null) {
-                                    TrackRepository.saveTrack(this, currentPlaylistName, data.getData());
+                                    TrackRepository.saveTrack(this, nameToSaveTo, data.getData());
                                     countAddedTracks++;
                                 }
                                 // 2. Multiple file selection
                                 else if (data.getClipData() != null) {
                                     for (int i = 0; i < data.getClipData().getItemCount(); i++) {
                                         Uri uri = data.getClipData().getItemAt(i).getUri();
-                                        TrackRepository.saveTrack(this, currentPlaylistName, uri);
+                                        TrackRepository.saveTrack(this, nameToSaveTo, uri);
                                         countAddedTracks++;
                                     }
                                 }
@@ -212,6 +214,8 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                                 // 3. Update UI and Service once finished
                                 if (countAddedTracks > 0) {
                                     int finalCount = countAddedTracks;
+                                    MainActivity.playlistModified = true;
+                                    currentPlaylistName = nameToSaveTo;
                                     runOnUiThread(() -> {
                                         Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
                                         LoadOrReloadMusicService();
@@ -234,8 +238,15 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     // Run this in a background thread so the UI doesn't freeze
                     new Thread(() -> {
                         try {
+                            String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
+                            if (nameToSaveTo.isEmpty()) {
+                                nameToSaveTo = currentPlaylistName;
+                            }
+
                             // The heavy lifting happens here
-                            int countAddedTracks = TrackRepository.saveTracksFromFolder(this, currentPlaylistName, folderUri);
+                            int countAddedTracks = TrackRepository.saveTracksFromFolder(this, nameToSaveTo, folderUri);
+                            MainActivity.playlistModified = true;
+                            currentPlaylistName = nameToSaveTo;
 
                             runOnUiThread(() -> {
                                 LoadOrReloadMusicService();
@@ -253,14 +264,13 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             });
 
     private void createNewPlaylist(String name) {
-
         java.util.List<String> existingNames = TrackRepository.getAllPlaylistNames(this);
 
         if (existingNames.contains(name)) {
             Toast.makeText(this, "Playlist '" + name + "' already exists!", Toast.LENGTH_SHORT).show();
-            // Just switch to it instead of clearing it
             this.currentPlaylistName = name;
             binding.editTextPlaylistName.setText(name);
+            updateSongCountUI();
             return;
         }
 
