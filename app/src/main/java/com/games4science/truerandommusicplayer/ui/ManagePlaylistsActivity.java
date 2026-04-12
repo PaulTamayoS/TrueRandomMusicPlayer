@@ -1,4 +1,4 @@
-package com.games4science.truerandommusicplayer;
+package com.games4science.truerandommusicplayer.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -16,13 +16,15 @@ import androidx.core.content.ContextCompat;
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.databinding.ActivityManagePlaylistsBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
-
-import org.json.JSONArray;
+import com.games4science.truerandommusicplayer.ui.adapters.TrackAdapter;
 
 public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private ActivityManagePlaylistsBinding binding;
     private String currentPlaylistName = ""; // Used if we are editing an existing list
+
+    private TrackAdapter adapter;
+    private java.util.List<String> trackList = new java.util.ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +39,12 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             currentPlaylistName = "My Library";
         }
         else {
-            // TODO: Load the list of tracks from TrackRepository and populate a RecyclerView here for individual deletion/viewing
+            loadTracksIntoList();
+
+            // Initialize RecyclerView
+            binding.rvTrackList.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+            adapter = new TrackAdapter(trackList, (uri, position) -> confirmTrackRemoval(uri, position));
+            binding.rvTrackList.setAdapter(adapter);
         }
 
         binding.editTextPlaylistName.setText(currentPlaylistName);
@@ -57,6 +64,34 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         binding.btnAddMusic.setOnClickListener(v -> openPicker(v));
         binding.btnClearLibrary.setOnClickListener(v ->  OnClickBtnClearLibrary());
         binding.btnSave.setOnClickListener(v -> handleDoneAndExit());
+    }
+
+    private void loadTracksIntoList() {
+        // We assume TrackRepository has a getTrackUris method that returns List<String>
+        trackList.clear();
+        trackList.addAll(TrackRepository.getTrackUris(this, currentPlaylistName));
+        if (adapter != null) adapter.notifyDataSetChanged();
+    }
+
+    private void confirmTrackRemoval(String uri, int position) {
+        new AlertDialog.Builder(this)
+                .setTitle("Remove Track")
+                .setMessage("Remove this song from the playlist?")
+                .setPositiveButton("Remove", (dialog, which) -> {
+                    // 1. Remove from Repository
+                    TrackRepository.removeSingleTrack(this, currentPlaylistName, uri);
+
+                    // 2. Update local list and UI
+                    trackList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    updateSongCountUI();
+
+                    // 3. Sync Service
+                    MainActivity.playlistModified = true;
+                    LoadOrReloadMusicService();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void LoadOrReloadMusicService()

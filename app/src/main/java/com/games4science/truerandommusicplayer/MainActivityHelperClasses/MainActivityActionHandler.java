@@ -5,8 +5,8 @@ import android.widget.SeekBar;
 
 import androidx.media3.session.MediaController;
 
-import com.games4science.truerandommusicplayer.MainActivity;
-import com.games4science.truerandommusicplayer.ManagePlaylistsActivity;
+import com.games4science.truerandommusicplayer.ui.MainActivity;
+import com.games4science.truerandommusicplayer.ui.ManagePlaylistsActivity;
 import com.games4science.truerandommusicplayer.player.MusicService;
 
 public class MainActivityActionHandler {

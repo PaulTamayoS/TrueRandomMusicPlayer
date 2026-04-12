@@ -10,7 +10,7 @@
     android:padding="24dp"
     android:gravity="center"
     android:background="?attr/android:colorBackground"
-    tools:context=".MainActivity">
+    tools:context=".ui.MainActivity">
 
     <!-- App Title -->
     <TextView

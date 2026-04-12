@@ -10,7 +10,7 @@
     android:padding="24dp"
     android:gravity="top|center_horizontal"
     android:background="?attr/android:colorBackground"
-    tools:context=".ManagePlaylistsActivity">
+    tools:context=".ui.ManagePlaylistsActivity">
 
     <TextView
         android:id="@+id/tvTitlePlayListsManagement"
@@ -58,6 +58,16 @@
         android:layout_marginTop="32dp"
         android:layout_marginBottom="12dp"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTrackList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_track" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddMusic"
         style="@style/Widget.Material3.Button"
@@ -65,15 +75,15 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="24dp"
         android:paddingVertical="12dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="8dp"
         android:text="@string/add_songs_to_library"
         app:backgroundTint="#1479EB" />
 
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="24dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnClearLibrary"
@@ -81,28 +91,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="?attr/colorError"
-        android:text="Clear All Songs from Playlist"
+        android:text="Clear All Songs"
         app:icon="@android:drawable/ic_menu_delete"
         app:iconTint="?attr/colorError"/>
 
-    <!-- Spacer to push buttons to bottom -->
     <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-    <LinearLayout
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_width="match_parent"
+        android:layout_height="30dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginStart="10dp"
-            android:text="Done" />
-    </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Done" />
 </LinearLayout>

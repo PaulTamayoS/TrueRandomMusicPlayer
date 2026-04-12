@@ -1,4 +1,4 @@
-package com.games4science.truerandommusicplayer;
+package com.games4science.truerandommusicplayer.ui;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -17,10 +17,11 @@ import androidx.media3.session.SessionToken;
 
 import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainActivityActionHandler;
 import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainActivityUiController;
+import com.games4science.truerandommusicplayer.R;
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
-import com.games4science.truerandommusicplayer.util.MyUtils;
 import com.games4science.truerandommusicplayer.data.TrackRepository;
+import com.games4science.truerandommusicplayer.util.MyUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import android.os.Handler;
