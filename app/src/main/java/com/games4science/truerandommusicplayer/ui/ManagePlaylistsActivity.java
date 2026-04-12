@@ -28,7 +28,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     private ActivityManagePlaylistsBinding binding;
     private String currentPlaylistName = ""; // Used if we are editing an existing list
 
-    private TrackAdapter adapter;
+    private TrackAdapter trackAdapter;
     private List<JSONObject> trackList = new ArrayList<>();
 
     @Override
@@ -43,14 +43,12 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
             currentPlaylistName = "My Library";
         }
-        else {
-            loadTracksIntoList();
 
-            // Initialize RecyclerView
-            binding.rvTrackList.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
-            adapter = new TrackAdapter(trackList, (uri, position) -> confirmTrackRemoval(uri, position));
-            binding.rvTrackList.setAdapter(adapter);
-        }
+        binding.rvTrackList.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        trackAdapter = new TrackAdapter(trackList, (uri, position) -> confirmTrackRemoval(uri, position));
+        binding.rvTrackList.setAdapter(trackAdapter);
+
+        loadTracksIntoList();
 
         binding.editTextPlaylistName.setText(currentPlaylistName);
         updateSongCountUI();
@@ -76,8 +74,8 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         // Use the new getTrackObjects method we discussed for TrackRepository
         trackList.addAll(TrackRepository.getTrackObjects(this, currentPlaylistName));
 
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
+        if (trackAdapter != null) {
+            trackAdapter.notifyDataSetChanged();
         }
     }
 
@@ -91,7 +89,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                     // 2. Update local list and UI
                     trackList.remove(position);
-                    adapter.notifyItemRemoved(position);
+                    trackAdapter.notifyItemRemoved(position);
                     updateSongCountUI();
 
                     // 3. Sync Service
@@ -143,6 +141,11 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             if (currentPlaylistName.equals(nameToClear)) {
                 LoadOrReloadMusicService();
             }
+        }
+
+        trackList.clear();
+        if (trackAdapter != null) {
+            trackAdapter.notifyDataSetChanged();
         }
 
         updateSongCountUI(); // Use your helper to refresh the text
@@ -261,6 +264,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                                     currentPlaylistName = nameToSaveTo;
                                     runOnUiThread(() -> {
                                         Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
+                                        loadTracksIntoList();
                                         LoadOrReloadMusicService();
                                         updateSongCountUI();
                                     });
@@ -292,6 +296,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                             currentPlaylistName = nameToSaveTo;
 
                             runOnUiThread(() -> {
+                                loadTracksIntoList();
                                 LoadOrReloadMusicService();
                                 updateSongCountUI();
                                 Toast.makeText(this, "Scan complete! Total tracks added = " + countAddedTracks, Toast.LENGTH_SHORT).show();
