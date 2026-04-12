@@ -122,7 +122,7 @@ public class TrackRepository {
         if (artist == null || artist.isEmpty()) { artist = "X"; }
 
         JSONObject trackJson = new JSONObject();
-        trackJson.put("uri", uri.toString());
+        trackJson.put(MyConstants.STRING_URI, uri.toString());
         trackJson.put("title", title);
         trackJson.put("artist", artist);
         return trackJson;
@@ -172,7 +172,7 @@ public class TrackRepository {
                         .build();
 
                 MediaItem item = new MediaItem.Builder()
-                        .setUri(Uri.parse(obj.getString("uri")))
+                        .setUri(Uri.parse(obj.getString(MyConstants.STRING_URI)))
                         .setMediaMetadata(metadata)
                         .build();
 
@@ -231,7 +231,7 @@ public class TrackRepository {
             for (int i = 0; i < existing.length(); i++) {
                 JSONObject track = existing.getJSONObject(i);
                 // Only keep tracks that DON'T match the URI we want to delete
-                if (!track.getString("uri").equals(uriToRemove)) {
+                if (!track.getString(MyConstants.STRING_URI).equals(uriToRemove)) {
                     updated.put(track);
                 }
             }

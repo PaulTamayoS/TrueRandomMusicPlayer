@@ -6,4 +6,12 @@ public class MyConstants {
 
     public static final String LOAD_PLAYLIST = "LOAD_PLAYLIST";
 
+
+
+    public static final String STRING_URI = "uri";
+
+
+    // "title"
+    // "artist"
+
 }

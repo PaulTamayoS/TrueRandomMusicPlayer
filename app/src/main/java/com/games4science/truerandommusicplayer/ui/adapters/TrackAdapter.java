@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.games4science.truerandommusicplayer.R;
+import com.games4science.truerandommusicplayer.util.MyConstants;
+
 import org.json.JSONObject;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             JSONObject track = trackList.get(position);
             String title = track.getString("title");
             String artist = track.getString("artist");
-            String uri = track.getString("uri");
+            String uri = track.getString(MyConstants.STRING_URI);
 
             holder.tvTrackName.setText(title + " - " + artist);
 
