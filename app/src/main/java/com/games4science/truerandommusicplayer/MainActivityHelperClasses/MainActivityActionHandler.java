@@ -8,6 +8,7 @@ import androidx.media3.session.MediaController;
 import com.games4science.truerandommusicplayer.ui.MainActivity;
 import com.games4science.truerandommusicplayer.ui.ManagePlaylistsActivity;
 import com.games4science.truerandommusicplayer.player.MusicService;
+import com.games4science.truerandommusicplayer.util.MyConstants;
 
 public class MainActivityActionHandler {
 
@@ -58,7 +59,7 @@ public class MainActivityActionHandler {
         String selectedPlaylist = uiController.GetSelectedPlayListName();
         // Create an Intent to transition from this activity to the Manage Activity
         Intent intent = new Intent(activity, ManagePlaylistsActivity.class);
-        intent.putExtra("playlist_name", selectedPlaylist);
+        intent.putExtra(MyConstants.SENT_KEY_PLAYLIST_NAME_TO_EDIT, selectedPlaylist);
         activity.startActivity(intent);
     }
 

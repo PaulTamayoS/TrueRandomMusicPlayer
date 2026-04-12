@@ -8,7 +8,8 @@ public class MyConstants {
     public static final String PLAYLIST_NAME = "PLAYLIST_NAME";
 
 
-    
+
+    public static final String SENT_KEY_PLAYLIST_NAME_TO_EDIT = "playlist_to_edit";
 
 
     public static final String STRING_URI = "uri";

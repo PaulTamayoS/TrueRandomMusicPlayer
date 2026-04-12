@@ -39,7 +39,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Check if we are EDITING an existing playlist
-        currentPlaylistName = getIntent().getStringExtra("playlist_name");
+        currentPlaylistName = getIntent().getStringExtra(MyConstants.SENT_KEY_PLAYLIST_NAME_TO_EDIT);
 
         if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
             currentPlaylistName = MyConstants.DEFAULT_PLAYLIST_NAME;
