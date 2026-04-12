@@ -9,9 +9,9 @@ public class MyConstants {
 
 
     public static final String STRING_URI = "uri";
+    public static final String STRING_TITLE = "title";
 
 
-    // "title"
     // "artist"
 
 }
