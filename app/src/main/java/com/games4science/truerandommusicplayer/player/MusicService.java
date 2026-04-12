@@ -13,6 +13,7 @@ import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
 
 import com.games4science.truerandommusicplayer.data.TrackRepository;
+import com.games4science.truerandommusicplayer.util.MyConstants;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +58,7 @@ public class MusicService extends MediaSessionService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if ("LOAD_PLAYLIST".equals(action)) {
+            if (MyConstants.LOAD_PLAYLIST.equals(action)) {
                 String playlistName = intent.getStringExtra("PLAYLIST_NAME");
                 loadPlaylist(playlistName);
             } else if ("TOGGLE_PURE_RANDOM".equals(action)) {

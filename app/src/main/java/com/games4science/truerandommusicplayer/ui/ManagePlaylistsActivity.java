@@ -17,6 +17,7 @@ import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.databinding.ActivityManagePlaylistsBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.ui.adapters.TrackAdapter;
+import com.games4science.truerandommusicplayer.util.MyConstants;
 
 import org.json.JSONObject;
 
@@ -111,7 +112,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         }
 
         Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction("LOAD_PLAYLIST");
+        serviceIntent.setAction(MyConstants.LOAD_PLAYLIST);
         serviceIntent.putExtra("PLAYLIST_NAME", nameToLoad);
         ContextCompat.startForegroundService(this, serviceIntent);
     }

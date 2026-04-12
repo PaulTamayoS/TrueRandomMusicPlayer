@@ -21,6 +21,7 @@ import com.games4science.truerandommusicplayer.R;
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.data.TrackRepository;
+import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -252,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Tell the MusicService to switch JSON keys and reload
         android.content.Intent intent = new android.content.Intent(MainActivity.this, MusicService.class);
-        intent.setAction("LOAD_PLAYLIST");
+        intent.setAction(MyConstants.LOAD_PLAYLIST);
         intent.putExtra("PLAYLIST_NAME", playlistName);
         startService(intent);
 
