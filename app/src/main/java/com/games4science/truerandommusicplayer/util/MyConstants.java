@@ -5,7 +5,10 @@ public class MyConstants {
     public static final String DEFAULT_PLAYLIST_NAME = "My Library";
 
     public static final String LOAD_PLAYLIST = "LOAD_PLAYLIST";
+    public static final String PLAYLIST_NAME = "PLAYLIST_NAME";
 
+
+    
 
 
     public static final String STRING_URI = "uri";

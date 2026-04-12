@@ -113,7 +113,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction(MyConstants.LOAD_PLAYLIST);
-        serviceIntent.putExtra("PLAYLIST_NAME", nameToLoad);
+        serviceIntent.putExtra(MyConstants.PLAYLIST_NAME, nameToLoad);
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 

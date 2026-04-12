@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         // Tell the MusicService to switch JSON keys and reload
         android.content.Intent intent = new android.content.Intent(MainActivity.this, MusicService.class);
         intent.setAction(MyConstants.LOAD_PLAYLIST);
-        intent.putExtra("PLAYLIST_NAME", playlistName);
+        intent.putExtra(MyConstants.PLAYLIST_NAME, playlistName);
         startService(intent);
 
         //Reset UI display while loading
