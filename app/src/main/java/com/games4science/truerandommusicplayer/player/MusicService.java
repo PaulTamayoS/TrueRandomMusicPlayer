@@ -119,9 +119,9 @@ public class MusicService extends MediaSessionService {
     }
 
     private void loadPlaylist(String playlistName) {
-        // If no name is provided (like on initial boot), default to "My Library"
+        // If no name is provided (like on initial boot), use our default playlist name
         if (playlistName == null || playlistName.isEmpty()) {
-            playlistName = "My Library";
+            playlistName = MyConstants.DEFAULT_PLAYLIST_NAME;
         }
 
         List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);

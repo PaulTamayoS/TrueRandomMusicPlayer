@@ -42,7 +42,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         currentPlaylistName = getIntent().getStringExtra("playlist_name");
 
         if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
-            currentPlaylistName = "My Library";
+            currentPlaylistName = MyConstants.DEFAULT_PLAYLIST_NAME;
         }
 
         binding.rvTrackList.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));

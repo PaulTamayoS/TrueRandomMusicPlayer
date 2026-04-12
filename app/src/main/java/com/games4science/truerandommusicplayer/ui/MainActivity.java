@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler progressHandler = new Handler(Looper.getMainLooper());
 
 
-    private String[] playlists = {"My Library"};
+    private String[] playlists = {MyConstants.DEFAULT_PLAYLIST_NAME};
     public static boolean playlistModified = false;
     private boolean isSpinnerTouched = false;
     private boolean isControllerSuccessfullyConnected = false;
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         uiController.ReloadDropDownSpinnerPlaylists(playlists);
 
         // Get the last known playlist name
-        String lastSaved = getSharedPreferences("player_prefs", MODE_PRIVATE).getString("last_playlist", "My Library");
+        String lastSaved = getSharedPreferences("player_prefs", MODE_PRIVATE).getString("last_playlist", MyConstants.DEFAULT_PLAYLIST_NAME);
 
         // Update the Spinner selection to match
         for (int i = 0; i < playlists.length; i++) {
