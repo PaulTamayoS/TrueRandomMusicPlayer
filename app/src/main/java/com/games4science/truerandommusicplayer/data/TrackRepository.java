@@ -207,4 +207,39 @@ public class TrackRepository {
                 .remove(oldName)          // Delete old key
                 .apply();
     }
+
+    public static List<JSONObject> getTrackObjects(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        List<JSONObject> list = new ArrayList<>();
+        try {
+            JSONArray array = new JSONArray(prefs.getString(playlistName, "[]"));
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.getJSONObject(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static void removeSingleTrack(Context context, String playlistName, String uriToRemove) {
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
+            JSONArray updated = new JSONArray();
+
+            for (int i = 0; i < existing.length(); i++) {
+                JSONObject track = existing.getJSONObject(i);
+                // Only keep tracks that DON'T match the URI we want to delete
+                if (!track.getString("uri").equals(uriToRemove)) {
+                    updated.put(track);
+                }
+            }
+
+            prefs.edit().putString(playlistName, updated.toString()).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

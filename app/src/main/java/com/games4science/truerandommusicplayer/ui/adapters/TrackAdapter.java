@@ -8,20 +8,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.games4science.truerandommusicplayer.R;
-
+import org.json.JSONObject;
 import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
-    private List<String> trackUris;
+    private List<JSONObject> trackList;
     private OnTrackRemoveListener listener;
 
     public interface OnTrackRemoveListener {
         void onRemove(String uri, int position);
     }
 
-    public TrackAdapter(List<String> trackUris, OnTrackRemoveListener listener) {
-        this.trackUris = trackUris;
+    public TrackAdapter(List<JSONObject> trackList, OnTrackRemoveListener listener) {
+        this.trackList = trackList;
         this.listener = listener;
     }
 
@@ -34,18 +34,27 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
-        String uriString = trackUris.get(position);
+        try {
+            // Now trackList exists and is a List of JSONObjects
+            JSONObject track = trackList.get(position);
+            String title = track.getString("title");
+            String artist = track.getString("artist");
+            String uri = track.getString("uri");
 
-        // Simple display: extract name from URI (You can improve this later with MediaMetadataRetriever)
-        String fileName = android.net.Uri.parse(uriString).getLastPathSegment();
-        holder.tvTrackName.setText(fileName);
+            holder.tvTrackName.setText(title + " - " + artist);
 
-        holder.btnRemove.setOnClickListener(v -> listener.onRemove(uriString, position));
+            holder.btnRemove.setOnClickListener(v ->
+                    listener.onRemove(uri, position)
+            );
+        } catch (Exception e) {
+            holder.tvTrackName.setText("Error loading track info");
+        }
     }
 
     @Override
     public int getItemCount() {
-        return trackUris.size();
+        // Return size of the correct list
+        return trackList != null ? trackList.size() : 0;
     }
 
     public static class TrackViewHolder extends RecyclerView.ViewHolder {

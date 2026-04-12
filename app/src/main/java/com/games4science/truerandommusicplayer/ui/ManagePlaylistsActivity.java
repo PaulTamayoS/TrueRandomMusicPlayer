@@ -18,13 +18,18 @@ import com.games4science.truerandommusicplayer.databinding.ActivityManagePlaylis
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.ui.adapters.TrackAdapter;
 
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private ActivityManagePlaylistsBinding binding;
     private String currentPlaylistName = ""; // Used if we are editing an existing list
 
     private TrackAdapter adapter;
-    private java.util.List<String> trackList = new java.util.ArrayList<>();
+    private List<JSONObject> trackList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +72,13 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     }
 
     private void loadTracksIntoList() {
-        // We assume TrackRepository has a getTrackUris method that returns List<String>
         trackList.clear();
-        trackList.addAll(TrackRepository.getTrackUris(this, currentPlaylistName));
-        if (adapter != null) adapter.notifyDataSetChanged();
+        // Use the new getTrackObjects method we discussed for TrackRepository
+        trackList.addAll(TrackRepository.getTrackObjects(this, currentPlaylistName));
+
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void confirmTrackRemoval(String uri, int position) {
