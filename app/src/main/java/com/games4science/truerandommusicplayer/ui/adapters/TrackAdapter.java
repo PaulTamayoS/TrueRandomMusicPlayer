@@ -40,7 +40,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             // Now trackList exists and is a List of JSONObjects
             JSONObject track = trackList.get(position);
             String title = track.getString(MyConstants.STRING_TITLE);
-            String artist = track.getString("artist");
+            String artist = track.getString(MyConstants.STRING_ARTIST);
             String uri = track.getString(MyConstants.STRING_URI);
 
             holder.tvTrackName.setText(title + " - " + artist);

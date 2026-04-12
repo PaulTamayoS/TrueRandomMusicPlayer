@@ -124,7 +124,7 @@ public class TrackRepository {
         JSONObject trackJson = new JSONObject();
         trackJson.put(MyConstants.STRING_URI, uri.toString());
         trackJson.put(MyConstants.STRING_TITLE, title);
-        trackJson.put("artist", artist);
+        trackJson.put(MyConstants.STRING_ARTIST, artist);
         return trackJson;
     }
 
@@ -168,7 +168,7 @@ public class TrackRepository {
 
                 MediaMetadata metadata = new MediaMetadata.Builder()
                         .setTitle(obj.getString(MyConstants.STRING_TITLE))
-                        .setArtist(obj.getString("artist"))
+                        .setArtist(obj.getString(MyConstants.STRING_ARTIST))
                         .build();
 
                 MediaItem item = new MediaItem.Builder()
