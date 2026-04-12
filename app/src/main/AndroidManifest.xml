@@ -25,7 +25,7 @@
         <!--        MAIN ACTIVITY      -->
         <!-- ========================= -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,9 +36,9 @@
         <!--  MANAGE PLAYLIST ACTIVITY -->
         <!-- ========================= -->
         <activity
-            android:name=".ManagePlaylistsActivity"
+            android:name=".ui.ManagePlaylistsActivity"
             android:label="Playlist Editor"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.MainActivity"
             android:exported="false" />
         <!-- ========================= -->
         <!--        MUSIC SERVICE      -->
