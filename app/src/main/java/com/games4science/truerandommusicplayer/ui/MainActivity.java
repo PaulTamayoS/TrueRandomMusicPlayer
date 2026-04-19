@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         uiController.ReloadDropDownSpinnerPlaylists(playlists);
 
         // Get the last known playlist name
-        String lastSaved = getSharedPreferences("player_prefs", MODE_PRIVATE).getString("last_playlist", MyConstants.DEFAULT_PLAYLIST_NAME);
+        String lastSaved = getSharedPreferences(MyConstants.PREFS_REPO_PLAYER, MODE_PRIVATE).getString(MyConstants.PREFS_KEY_LAST_PLAYLIST, MyConstants.DEFAULT_PLAYLIST_NAME);
 
         // Update the Spinner selection to match
         for (int i = 0; i < playlists.length; i++) {
@@ -246,9 +246,9 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "Changing Playlist to : " + playlistName, Toast.LENGTH_SHORT).show();
 
         // Save to disk so we remember even if the app process dies
-        getSharedPreferences("player_prefs", MODE_PRIVATE)
+        getSharedPreferences(MyConstants.PREFS_REPO_PLAYER, MODE_PRIVATE)
                 .edit()
-                .putString("last_playlist", playlistName)
+                .putString(MyConstants.PREFS_KEY_LAST_PLAYLIST, playlistName)
                 .apply();
 
         // Tell the MusicService to switch JSON keys and reload

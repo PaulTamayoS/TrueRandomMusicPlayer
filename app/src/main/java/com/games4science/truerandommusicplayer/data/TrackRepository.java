@@ -24,7 +24,7 @@ public class TrackRepository {
      * Gets all available playlist names for the Spinner
      */
     public static List<String> getAllPlaylistNames(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         // Get all keys (playlist names)
         List<String> names = new ArrayList<>(prefs.getAll().keySet());
 
@@ -40,7 +40,7 @@ public class TrackRepository {
     }
 
     public static void initializeEmptyPlaylist(Context context, String playlistName) {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         prefs.edit().putString(playlistName, "[]").apply(); // we put an empty array string
     }
 
@@ -129,7 +129,7 @@ public class TrackRepository {
     }
 
     private static void saveToPrefs(Context context, String playlistName, JSONObject trackJson) throws Exception {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
         existing.put(trackJson);
         prefs.edit().putString(playlistName, existing.toString()).commit();
@@ -137,7 +137,7 @@ public class TrackRepository {
 
     private static void saveBatchToPrefs(Context context, String playlistName, JSONArray newBatch) {
         try {
-            SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+            SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
             JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
 
             for (int i = 0; i < newBatch.length(); i++) {
@@ -151,12 +151,12 @@ public class TrackRepository {
     }
 
     public static void clearTracks(Context context, String playlistName) {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         prefs.edit().remove(playlistName).commit();
     }
 
     public static List<MediaItem> getTracks(Context context, String playlistName) {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         List<MediaItem> listOutput = new ArrayList<>();
 
         try {
@@ -185,7 +185,7 @@ public class TrackRepository {
     }
 
     public static int getTracksCount(Context context, String playlistName) {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         try {
             String jsonString = prefs.getString(playlistName, "[]");
             JSONArray array = new JSONArray(jsonString);
@@ -199,7 +199,7 @@ public class TrackRepository {
         if (oldName.equals(newName))
             return;
 
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         String data = prefs.getString(oldName, "[]");
 
         prefs.edit()
@@ -209,7 +209,7 @@ public class TrackRepository {
     }
 
     public static List<JSONObject> getTrackObjects(Context context, String playlistName) {
-        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         List<JSONObject> list = new ArrayList<>();
         try {
             JSONArray array = new JSONArray(prefs.getString(playlistName, "[]"));
@@ -224,7 +224,7 @@ public class TrackRepository {
 
     public static void removeSingleTrack(Context context, String playlistName, String uriToRemove) {
         try {
-            SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_TRACKS_REPO, Context.MODE_PRIVATE);
+            SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
             JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
             JSONArray updated = new JSONArray();
 
