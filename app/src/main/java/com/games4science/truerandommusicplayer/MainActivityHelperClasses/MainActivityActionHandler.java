@@ -66,7 +66,7 @@ public class MainActivityActionHandler {
     public void OnTogglePureRandom(boolean isChecked) {
         Intent intent = new Intent(activity, MusicService.class);
         intent.setAction(MyConstants.ACTION_TOGGLE_TRUE_RANDOM);
-        intent.putExtra("STATE", isChecked);
+        intent.putExtra(MyConstants.EXTRA_STATE_TOGGLE_TRUE_RANDOM, isChecked);
         activity.startService(intent);
 
         uiController.applyMadnessTheme(isChecked); // Triggers the "Madness" UI change
