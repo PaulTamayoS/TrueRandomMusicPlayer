@@ -9,6 +9,8 @@ import android.net.Uri;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+
+import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,13 +20,34 @@ import java.util.List;
 
 public class TrackRepository {
 
-    private static final String PREFS = "tracks_repo";
-    private static final String KEY_JSON_TRACKS = "json_tracks"; // Store everything in one JSON string
+    /**
+     * Gets all available playlist names for the Spinner
+     */
+    public static List<String> getAllPlaylistNames(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        // Get all keys (playlist names)
+        List<String> names = new ArrayList<>(prefs.getAll().keySet());
+
+        // Ensure default playlist always
+        if (!names.contains(MyConstants.DEFAULT_PLAYLIST_NAME)) {
+            names.add(0, MyConstants.DEFAULT_PLAYLIST_NAME); // Add to the start
+        } else {
+            // Optional: Move it to the start if it exists elsewhere
+            names.remove(MyConstants.DEFAULT_PLAYLIST_NAME);
+            names.add(0, MyConstants.DEFAULT_PLAYLIST_NAME);
+        }
+        return names;
+    }
+
+    public static void initializeEmptyPlaylist(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        prefs.edit().putString(playlistName, "[]").apply(); // we put an empty array string
+    }
 
     /**
      * Used for SINGLE file selection (User picked the file directly)
      */
-    public static void saveTrack(Context context, Uri uri) {
+    public static void saveTrack(Context context, String playlistName, Uri uri) {
         try {
             // Only persist if the URI supports it (picked via ACTION_OPEN_DOCUMENT)
             try {
@@ -35,7 +58,7 @@ public class TrackRepository {
             }
 
             JSONObject trackJson = getTrackMetadata(context, uri);
-            saveToPrefs(context, trackJson);
+            saveToPrefs(context, playlistName, trackJson);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,7 +68,7 @@ public class TrackRepository {
     /**
      * Used for FOLDER selection (User picked the folder)
      */
-    public static int saveTracksFromFolder(Context context, Uri folderUri) {
+    public static int saveTracksFromFolder(Context context,  String playlistName, Uri folderUri) {
         DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
         if (rootFolder == null || !rootFolder.isDirectory()) return 0;
 
@@ -53,7 +76,7 @@ public class TrackRepository {
         int count = scanDirectoryRecursive(context, rootFolder, allTracks);
 
         // Save everything ONCE at the very end
-        saveBatchToPrefs(context, allTracks);
+        saveBatchToPrefs(context, playlistName, allTracks);
         return count;
     }
 
@@ -80,7 +103,6 @@ public class TrackRepository {
         return addedCount;
     }
 
-    // --- HELPER METHODS TO CLEAN UP CODE ---
     private static JSONObject getTrackMetadata(Context context, Uri uri) throws Exception {
         String title = "Unknown Song";
         String artist = "Unknown Artist";
@@ -100,58 +122,57 @@ public class TrackRepository {
         if (artist == null || artist.isEmpty()) { artist = "X"; }
 
         JSONObject trackJson = new JSONObject();
-        trackJson.put("uri", uri.toString());
-        trackJson.put("title", title);
-        trackJson.put("artist", artist);
+        trackJson.put(MyConstants.JSON_KEY_URI, uri.toString());
+        trackJson.put(MyConstants.JSON_KEY_TITLE, title);
+        trackJson.put(MyConstants.JSON_KEY_ARTIST, artist);
         return trackJson;
     }
 
-    private static void saveToPrefs(Context context, JSONObject trackJson) throws Exception {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String jsonString = prefs.getString(KEY_JSON_TRACKS, "[]");
-        JSONArray array = new JSONArray(jsonString);
-        array.put(trackJson);
-        prefs.edit().putString(KEY_JSON_TRACKS, array.toString()).commit();
+    private static void saveToPrefs(Context context, String playlistName, JSONObject trackJson) throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
+        existing.put(trackJson);
+        prefs.edit().putString(playlistName, existing.toString()).commit();
     }
 
-    private static void saveBatchToPrefs(Context context, JSONArray newBatch) {
+    private static void saveBatchToPrefs(Context context, String playlistName, JSONArray newBatch) {
         try {
-            SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            JSONArray existing = new JSONArray(prefs.getString(KEY_JSON_TRACKS, "[]"));
+            SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+            JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
 
             for (int i = 0; i < newBatch.length(); i++) {
                 existing.put(newBatch.get(i));
             }
 
-            prefs.edit().putString(KEY_JSON_TRACKS, existing.toString()).commit();
+            prefs.edit().putString(playlistName, existing.toString()).commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void clearTracks(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit().remove(KEY_JSON_TRACKS).commit();
+    public static void clearTracks(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        prefs.edit().remove(playlistName).commit();
     }
 
-    public static List<MediaItem> getTracks(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    public static List<MediaItem> getTracks(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
         List<MediaItem> listOutput = new ArrayList<>();
 
         try {
-            String jsonString = prefs.getString(KEY_JSON_TRACKS, "[]");
+            String jsonString = prefs.getString(playlistName, "[]");
             JSONArray array = new JSONArray(jsonString);
 
             for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
 
                 MediaMetadata metadata = new MediaMetadata.Builder()
-                        .setTitle(obj.getString("title"))
-                        .setArtist(obj.getString("artist"))
+                        .setTitle(obj.getString(MyConstants.JSON_KEY_TITLE))
+                        .setArtist(obj.getString(MyConstants.JSON_KEY_ARTIST))
                         .build();
 
                 MediaItem item = new MediaItem.Builder()
-                        .setUri(Uri.parse(obj.getString("uri")))
+                        .setUri(Uri.parse(obj.getString(MyConstants.JSON_KEY_URI)))
                         .setMediaMetadata(metadata)
                         .build();
 
@@ -162,4 +183,63 @@ public class TrackRepository {
         }
         return listOutput;
     }
+
+    public static int getTracksCount(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        try {
+            String jsonString = prefs.getString(playlistName, "[]");
+            JSONArray array = new JSONArray(jsonString);
+            return array.length();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public static void renamePlaylist(Context context, String oldName, String newName) {
+        if (oldName.equals(newName))
+            return;
+
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        String data = prefs.getString(oldName, "[]");
+
+        prefs.edit()
+                .putString(newName, data) // Copy data to new key
+                .remove(oldName)          // Delete old key
+                .apply();
+    }
+
+    public static List<JSONObject> getTrackObjects(Context context, String playlistName) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+        List<JSONObject> list = new ArrayList<>();
+        try {
+            JSONArray array = new JSONArray(prefs.getString(playlistName, "[]"));
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.getJSONObject(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static void removeSingleTrack(Context context, String playlistName, String uriToRemove) {
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_REPO_TRACKS, Context.MODE_PRIVATE);
+            JSONArray existing = new JSONArray(prefs.getString(playlistName, "[]"));
+            JSONArray updated = new JSONArray();
+
+            for (int i = 0; i < existing.length(); i++) {
+                JSONObject track = existing.getJSONObject(i);
+                // Only keep tracks that DON'T match the URI we want to delete
+                if (!track.getString(MyConstants.JSON_KEY_URI).equals(uriToRemove)) {
+                    updated.put(track);
+                }
+            }
+
+            prefs.edit().putString(playlistName, updated.toString()).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -10,7 +10,7 @@
     android:padding="24dp"
     android:gravity="center"
     android:background="?attr/android:colorBackground"
-    tools:context=".MainActivity">
+    tools:context=".ui.MainActivity">
 
     <!-- App Title -->
     <TextView
@@ -22,37 +22,37 @@
         android:textColor="?attr/colorOnBackground"
         android:layout_marginBottom="48dp"/>
 
-    <!-- Pick Music Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddMusic"
-        style="@style/Widget.Material3.Button"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/colorPrimary"
-        android:icon="@android:drawable/stat_sys_upload"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/add_songs_to_library"
-        android:textColor="?attr/colorOnPrimary" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnClearLibrary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/clear_library"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Playlist : "
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnBackground" />
 
-    <!-- Optional: Status / instructions -->
-    <TextView
-        android:id="@+id/tvInstructions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select one or more audio files to start playing"
-        android:textColor="?attr/colorOnBackground"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="center"/>
+        <Spinner
+            android:id="@+id/spinnerPlaylists"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="150dp"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+      <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnPlaylistEditor"
+          style="@style/Widget.Material3.Button.TonalButton"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Playlist Editor"
+          app:icon="@android:drawable/ic_menu_edit"
+          android:layout_marginTop="8dp"
+          android:layout_marginBottom="24dp"/>
 
     <TextView
         android:id="@+id/txtTrackTitle"
@@ -61,10 +61,11 @@
         android:text="@string/no_track_playing"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:layout_marginTop="12dp"/>
 
     <SeekBar
-        android:id="@+id/seekBar"
+        android:id="@+id/trackSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:max="1000"/>
@@ -158,7 +159,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="26dp"
         android:layout_marginBottom="10dp"
-        android:text="Pure Random Madness!!!!"
+        android:text="True Random Madness!!!!"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         android:scaleX="1.3"
         android:scaleY="1.3"
@@ -187,7 +188,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:max="100"
-            android:progress="40" />
+            android:progress="30" />
 
         <ImageView
             android:layout_width="24dp"

@@ -13,6 +13,7 @@ import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
 
 import com.games4science.truerandommusicplayer.data.TrackRepository;
+import com.games4science.truerandommusicplayer.util.MyConstants;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,13 +36,13 @@ public class MusicService extends MediaSessionService {
                 .build();
 
         player = new ExoPlayer.Builder(this)
-                .setAudioAttributes(audioAttributes, true) // 'true' enables automatic ducking!
+                .setAudioAttributes(audioAttributes, false) // 'true' enables automatic ducking!
                 .setHandleAudioBecomingNoisy(true) // Pauses on headphone unplug
                 .setWakeMode(C.WAKE_MODE_NETWORK) // Prepares for future API/Network streaming
                 .build();
 
         player.setRepeatMode(Player.REPEAT_MODE_ALL);// Loop the entire shuffled list
-        player.setVolume(0.4f);
+        player.setVolume(0.30f);
 
         player.addListener(new Player.Listener() {
             @Override
@@ -51,62 +52,17 @@ public class MusicService extends MediaSessionService {
         });
 
         mediaSession = new MediaSession.Builder(this, player).build();
-        loadPlaylist(false); // Load but don't force play immediately on boot
-    }
-
-    private void handleMediaItemTransition(int reason) {
-        if (isPureRandomEnabled == true) {
-
-            // 1. If we are already in the middle of a random jump, STOP here.
-            if (isSearchingRandomTrack) {
-                isSearchingRandomTrack = false; // Reset for the next time
-                return;
-            }
-
-            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || // MEDIA_ITEM_TRANSITION_REASON_AUTO: means the previous song just finished
-                reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) // MEDIA_ITEM_TRANSITION_REASON_SEEK: User clicked Next or Previous
-            {
-                int totalTracks = player.getMediaItemCount();
-                if (totalTracks > 1) {
-                    int nextRandomIndex = (int) (Math.random() * totalTracks);
-                    isSearchingRandomTrack = true;
-                    player.seekTo(nextRandomIndex, 0);
-                }
-            }
-        }
-    }
-
-    private void loadPlaylist(boolean playImmediately) {
-        List<MediaItem> tracks = TrackRepository.getTracks(this);
-
-        if (tracks == null || tracks.isEmpty()) {
-            Toast.makeText(this, "No Tracks into the current list !!!", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
-            player.stop();
-            player.clearMediaItems();
-            return;
-        }
-
-        Collections.shuffle(tracks); // Shuffle creates a Light Random
-
-        Toast.makeText(this, "Loading list with : " + tracks.size() + " tracks", Toast.LENGTH_SHORT).show(); //TODO Show it in an UI text?
-
-        // Clear and update the player
-        player.setMediaItems(tracks);
-        player.prepare();
-
-        if (playImmediately) {
-            player.play();
-        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if ("LOAD_PLAYLIST".equals(action)) {
-                loadPlaylist(true);
-            } else if ("TOGGLE_PURE_RANDOM".equals(action)) {
-                isPureRandomEnabled = intent.getBooleanExtra("STATE", false);
+            if (MyConstants.ACTION_LOAD_PLAYLIST.equals(action)) {
+                String playlistName = intent.getStringExtra(MyConstants.EXTRA_PLAYLIST_NAME);
+                loadPlaylist(playlistName);
+            } else if (MyConstants.ACTION_TOGGLE_TRUE_RANDOM.equals(action)) {
+                isPureRandomEnabled = intent.getBooleanExtra(MyConstants.EXTRA_STATE_TOGGLE_TRUE_RANDOM, false);
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -138,5 +94,49 @@ public class MusicService extends MediaSessionService {
         }
 
         super.onDestroy();
+    }
+
+    private void handleMediaItemTransition(int reason) {
+        if (isPureRandomEnabled == true) {
+
+            // 1. If we are already in the middle of a random jump, STOP here.
+            if (isSearchingRandomTrack) {
+                isSearchingRandomTrack = false; // Reset for the next time
+                return;
+            }
+
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || // MEDIA_ITEM_TRANSITION_REASON_AUTO: means the previous song just finished
+                    reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) // MEDIA_ITEM_TRANSITION_REASON_SEEK: User clicked Next or Previous
+            {
+                int totalTracks = player.getMediaItemCount();
+                if (totalTracks > 1) {
+                    int nextRandomIndex = (int) (Math.random() * totalTracks);
+                    isSearchingRandomTrack = true;
+                    player.seekTo(nextRandomIndex, 0);
+                }
+            }
+        }
+    }
+
+    private void loadPlaylist(String playlistName) {
+        // If no name is provided (like on initial boot), use our default playlist name
+        if (playlistName == null || playlistName.isEmpty()) {
+            playlistName = MyConstants.DEFAULT_PLAYLIST_NAME;
+        }
+
+        List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);
+
+        if (tracks == null || tracks.isEmpty()) {
+            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show();
+            player.stop();
+            player.clearMediaItems();
+            return;
+        }
+
+        Collections.shuffle(tracks); // Shuffle creates a Light Random
+
+        // Clear and update the player
+        player.setMediaItems(tracks);
+        player.prepare();
     }
 }
