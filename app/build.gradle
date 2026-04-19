@@ -2,6 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+def keystorePropertiesFile = rootProject.file("local.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.games4science.truerandommusicplayer'
     compileSdk 36
@@ -16,8 +22,22 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile = keystoreProperties['RELEASE_STORE_FILE'] ? file(keystoreProperties['RELEASE_STORE_FILE']) : null
+            storePassword = keystoreProperties['RELEASE_STORE_PASSWORD']
+            keyAlias = keystoreProperties['RELEASE_KEY_ALIAS']
+            keyPassword = keystoreProperties['RELEASE_KEY_PASSWORD']
+        }
+    }
+
     buildTypes {
         release {
+            if (keystorePropertiesFile.exists() && keystoreProperties['RELEASE_STORE_FILE'] != null) {
+                signingConfig signingConfigs.release
+            } else {
+                println("Warning: local.properties or release keys not found. Build will be unsigned.")
+            }
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
