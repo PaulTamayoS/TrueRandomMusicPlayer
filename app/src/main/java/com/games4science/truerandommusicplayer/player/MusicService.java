@@ -58,10 +58,10 @@ public class MusicService extends MediaSessionService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if (MyConstants.LOAD_PLAYLIST.equals(action)) {
-                String playlistName = intent.getStringExtra(MyConstants.PLAYLIST_NAME);
+            if (MyConstants.ACTION_LOAD_PLAYLIST.equals(action)) {
+                String playlistName = intent.getStringExtra(MyConstants.EXTRA_PLAYLIST_NAME);
                 loadPlaylist(playlistName);
-            } else if ("TOGGLE_PURE_RANDOM".equals(action)) {
+            } else if (MyConstants.ACTION_TOGGLE_TRUE_RANDOM.equals(action)) {
                 isPureRandomEnabled = intent.getBooleanExtra("STATE", false);
             }
         }

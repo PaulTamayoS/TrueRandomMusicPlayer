@@ -39,7 +39,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Check if we are EDITING an existing playlist
-        currentPlaylistName = getIntent().getStringExtra(MyConstants.SENT_KEY_PLAYLIST_NAME_TO_EDIT);
+        currentPlaylistName = getIntent().getStringExtra(MyConstants.EXTRA_PLAYLIST_NAME_TO_EDIT);
 
         if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
             currentPlaylistName = MyConstants.DEFAULT_PLAYLIST_NAME;
@@ -112,8 +112,8 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         }
 
         Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction(MyConstants.LOAD_PLAYLIST);
-        serviceIntent.putExtra(MyConstants.PLAYLIST_NAME, nameToLoad);
+        serviceIntent.setAction(MyConstants.ACTION_LOAD_PLAYLIST);
+        serviceIntent.putExtra(MyConstants.EXTRA_PLAYLIST_NAME, nameToLoad);
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 

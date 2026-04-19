@@ -59,13 +59,13 @@ public class MainActivityActionHandler {
         String selectedPlaylist = uiController.GetSelectedPlayListName();
         // Create an Intent to transition from this activity to the Manage Activity
         Intent intent = new Intent(activity, ManagePlaylistsActivity.class);
-        intent.putExtra(MyConstants.SENT_KEY_PLAYLIST_NAME_TO_EDIT, selectedPlaylist);
+        intent.putExtra(MyConstants.EXTRA_PLAYLIST_NAME_TO_EDIT, selectedPlaylist);
         activity.startActivity(intent);
     }
 
     public void OnTogglePureRandom(boolean isChecked) {
         Intent intent = new Intent(activity, MusicService.class);
-        intent.setAction("TOGGLE_PURE_RANDOM");
+        intent.setAction(MyConstants.ACTION_TOGGLE_TRUE_RANDOM);
         intent.putExtra("STATE", isChecked);
         activity.startService(intent);
 
