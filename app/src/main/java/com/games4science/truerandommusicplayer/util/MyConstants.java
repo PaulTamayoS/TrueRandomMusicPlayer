@@ -4,9 +4,9 @@ public class MyConstants {
     private static final String PACKAGE = "com.games4science.truerandommusicplayer.";
 
     // 1. Storage Keys
-    public static final String PREFS_REPO_TRACKS = "tracks_repo";
-    public static final String PREFS_REPO_PLAYER = "player_prefs";
-    public static final String PREFS_KEY_LAST_PLAYLIST = "last_playlist";
+    public static final String PREFS_REPO_TRACKS = "PREFS_REPO_TRACKS";
+    public static final String PREFS_REPO_PLAYER = "PREFS_REPO_PLAYER";
+    public static final String PREFS_KEY_LAST_PLAYLIST = "PREFS_KEY_LAST_PLAYLIST";
     public static final String DEFAULT_PLAYLIST_NAME = "My Library";
 
     // 2. Action IDs
