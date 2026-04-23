@@ -10,9 +10,12 @@
         android:pivotY="12">
         <path
             android:fillColor="#8C37B0"
-            android:pathData="M12,1v10.55
+            android:pathData="M12,3v8.5
             c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,0
-            V9 h3.5 V4.5 h-5.5 z" />
+            V5  z" />
+        <path
+            android:fillColor="#8C37B0"
+            android:pathData="M12,6  L12,3  L17,7 Z" />
     </group>
 
     <group
