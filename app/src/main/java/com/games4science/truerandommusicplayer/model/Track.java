@@ -1,17 +1,38 @@
 package com.games4science.truerandommusicplayer.model;
 
-import android.net.Uri;
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+@Entity(tableName = "tracks") // This tells Room to create a table
 public class Track {
 
-    private final String name;
-    private final Uri uri;
+    @PrimaryKey(autoGenerate = true)
+    private int id; // Needed for the DB to uniquely identify rows
 
-    public Track(String name, Uri uri) {
+    @NonNull
+    private final String name;
+
+    @NonNull
+    private final String uriString; // Room prefers Strings over Uri objects
+
+    public Track(@NonNull String name, @NonNull String uriString) {
         this.name = name;
-        this.uri = uri;
+        this.uriString = uriString;
     }
 
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    @NonNull
     public String getName() { return name; }
-    public Uri getUri() { return uri; }
+
+    @NonNull
+    public String getUriString() { return uriString; }
+
+    // Helper to get actual Uri when needed for Media3
+    public android.net.Uri getUri() {
+        return android.net.Uri.parse(uriString);
+    }
 }
