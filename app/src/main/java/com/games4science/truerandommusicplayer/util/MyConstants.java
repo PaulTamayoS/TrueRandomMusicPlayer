@@ -9,6 +9,8 @@ public class MyConstants {
     public static final String PREFS_KEY_LAST_PLAYLIST = "PREFS_KEY_LAST_PLAYLIST";
     public static final String DEFAULT_PLAYLIST_NAME = "My Library";
 
+    public static final String ROOMDB_DBNAME = "TRMP_DB";
+
     // 2. Action IDs
     public static final String ACTION_LOAD_PLAYLIST = PACKAGE + "ACTION_LOAD_PLAYLIST";
     public static final String ACTION_TOGGLE_TRUE_RANDOM = PACKAGE + "ACTION_TOGGLE_TRUE_RANDOM";
