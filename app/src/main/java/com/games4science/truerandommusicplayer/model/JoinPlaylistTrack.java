@@ -3,10 +3,10 @@ package com.games4science.truerandommusicplayer.model;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.PrimaryKey;
 
 @Entity(
         tableName = "join_playlist_track",
-        primaryKeys = {"playlistId", "uriString"},
         foreignKeys = {
                 @ForeignKey(
                         entity = Playlist.class,
@@ -24,7 +24,11 @@ import androidx.room.ForeignKey;
 )
 public class JoinPlaylistTrack {
 
+    @PrimaryKey(autoGenerate = true)
+    public int joinId;
+
     public long playlistId;
+
     @NonNull
     public String uriString;
 

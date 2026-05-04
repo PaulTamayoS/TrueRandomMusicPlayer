@@ -24,10 +24,10 @@ public interface LibraryDao {
     long insertPlaylist(Playlist playlist);
 
     // Add a song to a playlist
-    @Insert(onConflict = OnConflictStrategy.IGNORE) // TODO: actually, it is okay to have more than once the same song in the playlist
+    @Insert
     void addTrackToPlaylist(JoinPlaylistTrack join);
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert
     void addTracksToPlaylist(List<JoinPlaylistTrack> joins);
 
     // --- QUERIES ---
@@ -60,4 +60,7 @@ public interface LibraryDao {
     // Quick helper to clear a playlist by name without having the Playlist object
     @Query("DELETE FROM join_playlist_track WHERE playlistId IN (SELECT playlistId FROM playlists WHERE playlistName = :pName)")
     void clearPlaylistByName(String pName);
+
+    @Query("DELETE FROM join_playlist_track WHERE playlistId = :pId AND uriString = :uStr")
+    void removeAllInstancesOfTrackFromPlaylist(int pId, String uStr);
 }
