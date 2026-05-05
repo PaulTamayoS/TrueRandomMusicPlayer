@@ -187,7 +187,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         }
 
         if (newName.equals(currentPlaylistName)) {
-            Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
             finish(); // No changes made
             return;
         }
@@ -198,7 +197,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 if (success) {
                     currentPlaylistName = newName;
                     MainActivity.playlistModified = true; // Tell MainActivity that something changed!
-                    Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     // Show error if the name was already taken
@@ -248,46 +246,40 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),result -> {
                         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                             Intent data = result.getData();
+                            List<Uri> urisToProcess = new ArrayList<>();
+
+                            if (data.getData() != null) { // Single file selection
+                                urisToProcess.add(data.getData());
+                            } else if (data.getClipData() != null) { // Multiple file selection
+                                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                                    urisToProcess.add(data.getClipData().getItemAt(i).getUri());
+                                }
+                            }
+
+                            if (urisToProcess.isEmpty()) return;
 
                             // Show a quick toast so the user knows something is happening
-                            Toast.makeText(this, "Adding files...", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Adding " + urisToProcess.size() + " files...", Toast.LENGTH_SHORT).show();
 
-                            // Move the loop to a background thread
-                            new Thread(() -> {
-                                int countAddedTracks = 0;
+                            String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
+                            if (nameToSaveTo.isEmpty()) {
+                                nameToSaveTo = currentPlaylistName;
+                            }
+                            String localNameToSaveTo = nameToSaveTo;
 
-                                String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
-                                if (nameToSaveTo.isEmpty()) {
-                                    nameToSaveTo = currentPlaylistName;
-                                }
-
-                                // Single file selection
-                                if (data.getData() != null) {
-                                    TrackRepository.saveTrack(this, nameToSaveTo, data.getData());
-                                    countAddedTracks++;
-                                }
-                                // Multiple file selection
-                                else if (data.getClipData() != null) {
-                                    for (int i = 0; i < data.getClipData().getItemCount(); i++) {
-                                        Uri uri = data.getClipData().getItemAt(i).getUri();
-                                        TrackRepository.saveTrack(this, nameToSaveTo, uri);
-                                        countAddedTracks++;
-                                    }
-                                }
-
-                                // 3. Update UI and Service once finished
-                                if (countAddedTracks > 0) {
-                                    int finalCount = countAddedTracks;
-                                    MainActivity.playlistModified = true;
-                                    currentPlaylistName = nameToSaveTo;
-                                    runOnUiThread(() -> {
-                                        Toast.makeText(this, "Added " + finalCount + " tracks!", Toast.LENGTH_SHORT).show();
+                            TrackRepository.saveTracksFromFilesPicker(this, nameToSaveTo, urisToProcess, countAdded -> {
+                                // ONLY update the UI once the background work is fully DONE
+                                runOnUiThread(() -> {
+                                    if (countAdded > 0) {
+                                        MainActivity.playlistModified = true;
+                                        currentPlaylistName = localNameToSaveTo;
                                         loadTracksIntoList();
                                         LoadOrReloadMusicService();
                                         updateSongCountUI();
-                                    });
-                                }
-                            }).start();
+                                        Toast.makeText(this, "Added " + countAdded + " tracks!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            });
                         }
                     }
             );

@@ -64,35 +64,41 @@ public class TrackRepository {
     }
 
     /**
-     * Used for SINGLE file selection (User picked the file directly)
+     * Used for FILE(S) selection (User picked the file(s) directly)
      */
-    public static void saveTrack(Context context, String playlistName, Uri uri) {
+    public static void saveTracksFromFilesPicker(Context context, String playlistName, List<Uri> uris, RepositoryCallback<Integer> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
+            int count = 0;
             try {
-                // Only persist if the URI supports it (picked via ACTION_OPEN_DOCUMENT)
-                try {
-                    context.getContentResolver().takePersistableUriPermission(uri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                } catch (SecurityException ignored) {
-                    // Not a persistable URI, ignore and continue
-                }
-
                 LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-
-                Track track = getTrackMetadata(context, uri);
-                dao.insertTrack(track);
-
                 long pId = dao.createPlaylist(new Playlist(playlistName));
-                if (pId == -1) {
-                    // If createPlaylist returns -1, it already existed, so we find its ID
+                if (pId == -1) { // If createPlaylist returns -1, it already existed, so we find its ID
                     pId = dao.getPlaylistIdByName(playlistName);
                 }
 
-                dao.addTrackToPlaylist(new JoinPlaylistTrack((int) pId, uri.toString()));
+                List<JoinPlaylistTrack> joins = new ArrayList<>();
+                for (Uri uri : uris) {
+                    try {
+                        // Only persist if the URI supports it (picked via ACTION_OPEN_DOCUMENT)
+                        context.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        Track track = getTrackMetadata(context, uri);
+                        dao.insertTrack(track);
+
+                        joins.add(new JoinPlaylistTrack((int) pId, uri.toString()));
+                        count++;
+                    } catch (SecurityException ignored) {
+                        // Not a persistable URI, ignore and continue
+                    }
+                }
+
+                dao.addTracksToPlaylist(joins);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            callback.onComplete(count);
         });
     }
 
