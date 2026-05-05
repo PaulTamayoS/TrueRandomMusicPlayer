@@ -193,6 +193,15 @@ public class TrackRepository {
         });
     }
 
+    public static void getTracksCountByPlaylistName(Context context, String playlistName, RepositoryCallback<Integer> callback)
+    {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
+            int count = dao.getTracksCountForPlaylist(playlistName);
+            callback.onComplete(count);
+        });
+    }
+
     public static void removeSingleTrack(Context context, String playlistName, String uriToRemove) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();

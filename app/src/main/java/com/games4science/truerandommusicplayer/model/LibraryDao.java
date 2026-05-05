@@ -45,6 +45,11 @@ public interface LibraryDao {
             "WHERE P.playlistName = :pName")
     List<Track> getTracksForPlaylist(String pName);
 
+    @Query("SELECT COUNT(*) FROM join_playlist_track J " +
+            "INNER JOIN playlists P ON P.playlistId = J.playlistId " +
+            "WHERE P.playlistName = :pName")
+    int getTracksCountForPlaylist(String pName);
+
     // --- UPDATES ---
 
     @Query("UPDATE playlists SET playlistName = :newName WHERE playlistName = :currentPlaylistName ")

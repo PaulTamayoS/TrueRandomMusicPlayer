@@ -57,9 +57,8 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private void updateSongCountUI() {
         String currentName = binding.editTextPlaylistName.getText().toString().trim();
-        TrackRepository.getTracks(this, currentName, tracks -> {
+        TrackRepository.getTracksCountByPlaylistName(this, currentName, count -> {
             runOnUiThread(() -> {
-                int count = (tracks != null) ? tracks.size() : 0;
                 binding.tvTotalSongsInPlaylist.setText(count + " Songs in this Playlist");
             });
         });
