@@ -49,13 +49,13 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         loadTracksIntoList();
 
-        binding.editTextPlaylistName.setText(currentPlaylistName);
+        binding.editTextPlaylistName.setText(currentPlaylistName); // TODO: Check if can reduce the number of times that I use currentPlaylistName and reading editTextPlaylistName
         updateSongCountUI();
 
         setupButtons();
     }
 
-    private void updateSongCountUI() {
+    private void updateSongCountUI() { // TODO: almost always called after updateSongCountUI(); check if call it at the end of that method
         String currentName = binding.editTextPlaylistName.getText().toString().trim();
         TrackRepository.getTracksCountByPlaylistName(this, currentName, count -> {
             runOnUiThread(() -> {
