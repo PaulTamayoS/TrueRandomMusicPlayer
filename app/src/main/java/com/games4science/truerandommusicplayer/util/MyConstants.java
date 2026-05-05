@@ -4,7 +4,6 @@ public class MyConstants {
     private static final String PACKAGE = "com.games4science.truerandommusicplayer.";
 
     // 1. Storage Keys
-    public static final String PREFS_REPO_TRACKS = "PREFS_REPO_TRACKS";
     public static final String PREFS_REPO_PLAYER = "PREFS_REPO_PLAYER";
     public static final String PREFS_KEY_LAST_PLAYLIST = "PREFS_KEY_LAST_PLAYLIST";
     public static final String DEFAULT_PLAYLIST_NAME = "My Library";
@@ -19,9 +18,4 @@ public class MyConstants {
     public static final String EXTRA_PLAYLIST_NAME_TO_EDIT = PACKAGE + "EXTRA_PLAYLIST_TO_EDIT";
     public static final String EXTRA_PLAYLIST_NAME = PACKAGE + "EXTRA_PLAYLIST_NAME";
     public static final String EXTRA_STATE_TOGGLE_TRUE_RANDOM = PACKAGE + "STATE_TOGGLE_TRUE_RANDOM";
-
-    // 4. JSON Model Keys
-    public static final String JSON_KEY_URI = "uri";
-    public static final String JSON_KEY_TITLE = "title";
-    public static final String JSON_KEY_ARTIST = "artist";
 }
