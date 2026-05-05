@@ -35,13 +35,16 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
-        try {
-            Track track = trackList.get(position);
-            holder.tvTrackName.setText(track.getName() + " - " + track.getArtist());
-            holder.btnRemove.setOnClickListener(v -> listener.onRemove(track.getUriString(), position));
-        } catch (Exception e) {
-            holder.tvTrackName.setText("Error loading track info");
-        }
+        Track track = trackList.get(position);
+        holder.tvTrackName.setText(track.getName() + " - " + track.getArtist());
+
+
+        holder.btnRemove.setOnClickListener(v -> {
+            int currentPos = holder.getAbsoluteAdapterPosition();
+            if (currentPos != RecyclerView.NO_POSITION) {
+                listener.onRemove(trackList.get(currentPos).getUriString(), currentPos);
+            }
+        });
     }
 
     @Override

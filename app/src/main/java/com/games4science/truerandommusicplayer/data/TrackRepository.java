@@ -37,7 +37,9 @@ public class TrackRepository {
             List<Playlist> playlists = dao.getAllPlaylists();
             List<String> names = new ArrayList<>();
             for (Playlist p : playlists) {
-                names.add(p.playlistName);
+                if (!names.contains(p.playlistName)) {
+                    names.add(p.playlistName);
+                }
             }
 
             // Ensure default playlist exists in DB if it's missing
@@ -220,10 +222,22 @@ public class TrackRepository {
         });
     }
 
-    public static void renamePlaylist(Context context, String currentPlaylistName, String newName) {
+    public static void renamePlaylist(Context context, String currentPlaylistName, String newName, RepositoryCallback<Boolean> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            dao.renamePlaylist(currentPlaylistName, newName);
+            try {
+                // Check if the new name is already taken by a DIFFERENT playlist
+                long existingId = dao.getPlaylistIdByName(newName);
+                if (existingId != 0) {
+                    callback.onComplete(false); // Name already exists!
+                    return;
+                }
+
+                dao.renamePlaylist(currentPlaylistName, newName);
+                callback.onComplete(true);
+            } catch (Exception e) {
+                callback.onComplete(false);
+            }
         });
     }
 }

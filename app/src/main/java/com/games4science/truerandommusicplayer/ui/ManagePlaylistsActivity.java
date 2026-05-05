@@ -95,6 +95,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                     trackList.remove(position);
                     trackAdapter.notifyItemRemoved(position);
+                    trackAdapter.notifyItemRangeChanged(position, trackList.size() - position);
                     updateSongCountUI();
 
                     MainActivity.playlistModified = true;
@@ -185,15 +186,27 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             return;
         }
 
-        // If the user changed the name in the EditText, perform a rename
-        if (newName.equals(currentPlaylistName) == false) {
-            TrackRepository.renamePlaylist(this, currentPlaylistName, newName);
-            currentPlaylistName = newName;
-            MainActivity.playlistModified = true; // Tell MainActivity that something changed!
+        if (newName.equals(currentPlaylistName)) {
+            Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
+            finish(); // No changes made
+            return;
         }
 
-        Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
-        finish();
+        // If the user changed the name in the EditText, perform a rename
+        TrackRepository.renamePlaylist(this, currentPlaylistName, newName, success -> {
+            runOnUiThread(() -> {
+                if (success) {
+                    currentPlaylistName = newName;
+                    MainActivity.playlistModified = true; // Tell MainActivity that something changed!
+                    Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    // Show error if the name was already taken
+                    binding.editTextPlaylistName.setError("This playlist name already exists!");
+                    Toast.makeText(this, "Could not rename: Name already taken", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
     }
 
     private void showCreatePlaylistDialog() {
