@@ -86,12 +86,12 @@
         android:layout_marginBottom="8dp"/>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnClearLibrary"
+        android:id="@+id/btnDeletePlaylist"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="?attr/colorError"
-        android:text="Clear All Songs"
+        android:text="Delete Playlist"
         app:icon="@android:drawable/ic_menu_delete"
         app:iconTint="?attr/colorError"/>
 
