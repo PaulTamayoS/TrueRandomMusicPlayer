@@ -14,16 +14,25 @@ public class Track {
     @NonNull
     private final String name;
 
-    public Track(@NonNull String name, @NonNull String uriString) {
+    @NonNull
+    private final String artist;
+
+    public Track(@NonNull String name, @NonNull String uriString, @NonNull String artist) {
         this.name = name;
         this.uriString = uriString;
+        this.artist = artist;
     }
+
+    @NonNull
+    public String getUriString() { return uriString; }
 
     @NonNull
     public String getName() { return name; }
 
     @NonNull
-    public String getUriString() { return uriString; }
+    public String getArtist() { return artist; }
+
+
 
     // Helper to get actual Uri when needed for Media3
     public android.net.Uri getUri() {

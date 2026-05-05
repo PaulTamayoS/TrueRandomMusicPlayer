@@ -120,23 +120,27 @@ public class MusicService extends MediaSessionService {
 
     private void loadPlaylist(String playlistName) {
         // If no name is provided (like on initial boot), use our default playlist name
-        if (playlistName == null || playlistName.isEmpty()) {
-            playlistName = MyConstants.DEFAULT_PLAYLIST_NAME;
-        }
+        final String finalPlaylistName = (playlistName == null || playlistName.isEmpty())
+                ? MyConstants.DEFAULT_PLAYLIST_NAME
+                : playlistName;
 
-        List<MediaItem> tracks = TrackRepository.getTracks(this, playlistName);
+        TrackRepository.getTracks(this, finalPlaylistName, tracks -> {
+            getMainExecutor().execute(() -> {
+                if (tracks == null || tracks.isEmpty()) {
+                    Toast.makeText(MusicService.this,
+                            "The playlist '" + finalPlaylistName + "' is empty!",
+                            Toast.LENGTH_SHORT).show();
+                    player.stop();
+                    player.clearMediaItems();
+                    return;
+                }
 
-        if (tracks == null || tracks.isEmpty()) {
-            Toast.makeText(this, "The playlist '" + playlistName + "' is empty!", Toast.LENGTH_SHORT).show();
-            player.stop();
-            player.clearMediaItems();
-            return;
-        }
+                Collections.shuffle(tracks); // Shuffle creates a Light Random
 
-        Collections.shuffle(tracks); // Shuffle creates a Light Random
-
-        // Clear and update the player
-        player.setMediaItems(tracks);
-        player.prepare();
+                // Clear and update the player
+                player.setMediaItems(tracks);
+                player.prepare();
+            });
+        });
     }
 }

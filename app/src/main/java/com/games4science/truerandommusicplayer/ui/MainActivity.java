@@ -152,20 +152,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void OnResumeRefreshPlaylistSpinner() {
-        java.util.List<String> namesFromRepo = TrackRepository.getAllPlaylistNames(this);
-        playlists = namesFromRepo.toArray(new String[0]);
-        uiController.ReloadDropDownSpinnerPlaylists(playlists);
+        TrackRepository.getAllPlaylistNames(this, namesFromRepo -> {
+            runOnUiThread(() -> {
+                playlists = namesFromRepo.toArray(new String[0]);
+                uiController.ReloadDropDownSpinnerPlaylists(playlists);
 
-        // Get the last known playlist name
-        String lastSaved = getSharedPreferences(MyConstants.PREFS_REPO_PLAYER, MODE_PRIVATE).getString(MyConstants.PREFS_KEY_LAST_PLAYLIST, MyConstants.DEFAULT_PLAYLIST_NAME);
+                // Get the last known playlist name
+                String lastSaved = getSharedPreferences(MyConstants.PREFS_REPO_PLAYER, MODE_PRIVATE).getString(MyConstants.PREFS_KEY_LAST_PLAYLIST, MyConstants.DEFAULT_PLAYLIST_NAME);
 
-        // Update the Spinner selection to match
-        for (int i = 0; i < playlists.length; i++) {
-            if (playlists[i].equals(lastSaved)) {
-                binding.spinnerPlaylists.setSelection(i);
-                break;
-            }
-        }
+                // Update the Spinner selection to match
+                for (int i = 0; i < playlists.length; i++) {
+                    if (playlists[i].equals(lastSaved)) {
+                        binding.spinnerPlaylists.setSelection(i);
+                        break;
+                    }
+                }
+            });
+        });
     }
 
     @Override

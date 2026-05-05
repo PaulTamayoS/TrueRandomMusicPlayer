@@ -8,21 +8,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.games4science.truerandommusicplayer.R;
-import com.games4science.truerandommusicplayer.util.MyConstants;
+import com.games4science.truerandommusicplayer.model.Track;
 
-import org.json.JSONObject;
 import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
-    private List<JSONObject> trackList;
+    private List<Track> trackList;
     private OnTrackRemoveListener listener;
 
     public interface OnTrackRemoveListener {
         void onRemove(String uri, int position);
     }
 
-    public TrackAdapter(List<JSONObject> trackList, OnTrackRemoveListener listener) {
+    public TrackAdapter(List<Track> trackList, OnTrackRemoveListener listener) {
         this.trackList = trackList;
         this.listener = listener;
     }
@@ -37,17 +36,9 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
         try {
-            // Now trackList exists and is a List of JSONObjects
-            JSONObject track = trackList.get(position);
-            String title = track.getString(MyConstants.JSON_KEY_TITLE);
-            String artist = track.getString(MyConstants.JSON_KEY_ARTIST);
-            String uri = track.getString(MyConstants.JSON_KEY_URI);
-
-            holder.tvTrackName.setText(title + " - " + artist);
-
-            holder.btnRemove.setOnClickListener(v ->
-                    listener.onRemove(uri, position)
-            );
+            Track track = trackList.get(position);
+            holder.tvTrackName.setText(track.getName() + " - " + track.getArtist());
+            holder.btnRemove.setOnClickListener(v -> listener.onRemove(track.getUriString(), position));
         } catch (Exception e) {
             holder.tvTrackName.setText("Error loading track info");
         }
