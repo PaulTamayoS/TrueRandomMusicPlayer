@@ -1,6 +1,7 @@
 package com.games4science.truerandommusicplayer.ui;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler progressHandler = new Handler(Looper.getMainLooper());
 
-
     private String[] playlists = {MyConstants.DEFAULT_PLAYLIST_NAME};
     public static boolean playlistModified = false;
     private boolean isSpinnerTouched = false;
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private MainActivityUiController uiController;
     private MainActivityActionHandler actionHandler;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                     if (actionHandler!= null && actionHandler.IsUserInteractingWithTrackSeekingBar() == false) { // Only update if the user IS NOT touching the bar
                         binding.trackSeekBar.setProgress(progress);
                     }
-                    binding.txtTime.setText( MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
+                    binding.txtTime.setText(MyUtils.formatTime(position) + " / " + MyUtils.formatTime(duration) );
                 }
 
                 MediaItem item = controller.getCurrentMediaItem();
@@ -226,8 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String selected = playlists[position];
 
-                // 1. If we aren't connected yet, just sync the variable and wait.
-                // This prevents the "Auto-Selection" on boot from triggering a load.
+                // If we aren't connected yet, just sync the variable and wait. This prevents the "Auto-Selection" on boot from triggering a load.
                 if (!isControllerSuccessfullyConnected) {
                     return;
                 }

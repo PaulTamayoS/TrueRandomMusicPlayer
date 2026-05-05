@@ -16,8 +16,6 @@ import com.games4science.truerandommusicplayer.model.JoinPlaylistTrack;
 import com.games4science.truerandommusicplayer.model.LibraryDao;
 import com.games4science.truerandommusicplayer.model.Playlist;
 import com.games4science.truerandommusicplayer.model.Track;
-import com.games4science.truerandommusicplayer.util.MyConstants;
-import com.games4science.truerandommusicplayer.util.MyUtils;
 
 import java.util.ArrayList;
 import java.util.List;

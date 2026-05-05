@@ -16,7 +16,6 @@ import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.util.MyConstants;
 
 import java.util.Collections;
-import java.util.List;
 
 public class MusicService extends MediaSessionService {
 
