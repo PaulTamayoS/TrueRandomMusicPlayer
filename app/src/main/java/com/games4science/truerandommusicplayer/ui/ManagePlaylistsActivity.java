@@ -169,7 +169,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         TrackRepository.renamePlaylist(this, currentPlaylistName, newName, success -> {
             runOnUiThread(() -> {
                 if (success) {
-                    currentPlaylistName = newName;
                     MainActivity.playlistModified = true; // Tell MainActivity that something changed!
                     finish();
                 } else {
