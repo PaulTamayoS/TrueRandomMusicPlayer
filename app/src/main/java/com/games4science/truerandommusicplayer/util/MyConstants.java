@@ -15,7 +15,8 @@ public class MyConstants {
     public static final String ACTION_TOGGLE_TRUE_RANDOM = PACKAGE + "ACTION_TOGGLE_TRUE_RANDOM";
 
     // 3. Intent Extra Keys
-    public static final String EXTRA_PLAYLIST_NAME_TO_EDIT = PACKAGE + "EXTRA_PLAYLIST_TO_EDIT";
+    public static final String EXTRA_PLAYLIST_ID_TO_EDIT = PACKAGE + "EXTRA_PLAYLIST_ID_TO_EDIT";
+    public static final String EXTRA_PLAYLIST_NAME_TO_EDIT = PACKAGE + "EXTRA_PLAYLIST_NAME_TO_EDIT";
     public static final String EXTRA_PLAYLIST_NAME = PACKAGE + "EXTRA_PLAYLIST_NAME";
     public static final String EXTRA_STATE_TOGGLE_TRUE_RANDOM = PACKAGE + "STATE_TOGGLE_TRUE_RANDOM";
 }
