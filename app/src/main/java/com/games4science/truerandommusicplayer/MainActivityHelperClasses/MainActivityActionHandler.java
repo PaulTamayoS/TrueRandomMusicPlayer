@@ -56,10 +56,14 @@ public class MainActivityActionHandler {
 
     public void OnClickBtnPlaylistEditor()
     {
-        String selectedPlaylist = uiController.GetSelectedPlayListName();
+        int position = uiController.GetSelectedPlayListPosition();
+        long selectedId = activity.playlistObjects.get(position).playlistId;
+        String selectedPlaylistName = uiController.GetSelectedPlayListName();
+
         // Create an Intent to transition from this activity to the Manage Activity
         Intent intent = new Intent(activity, ManagePlaylistsActivity.class);
-        intent.putExtra(MyConstants.EXTRA_PLAYLIST_NAME_TO_EDIT, selectedPlaylist);
+        intent.putExtra(MyConstants.EXTRA_PLAYLIST_ID_TO_EDIT, selectedId);
+        intent.putExtra(MyConstants.EXTRA_PLAYLIST_NAME_TO_EDIT, selectedPlaylistName);
         activity.startActivity(intent);
     }
 
