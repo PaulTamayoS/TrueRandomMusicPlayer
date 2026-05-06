@@ -133,7 +133,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     private void handleDoneAndExit() {
         String newName = binding.editTextPlaylistName.getText().toString().trim();
 
-        if (newName.isEmpty() && currentPlaylistName.equals("") == false) {
+        if (newName.isEmpty()) {
             binding.editTextPlaylistName.setError("Name is required");
             return;
         }
@@ -320,26 +320,18 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     }
 
     private void executeDeletePlaylist(String nameToClear) {
-        TrackRepository.deletePlaylistByName(this, nameToClear, s -> {
+        TrackRepository.deletePlaylistByName(this, nameToClear, deletedName -> {
             runOnUiThread(() -> {
-                // We need to reload the music service if the playlist currently playing is modified
-                if (currentPlaylistName != null && currentPlaylistName.isEmpty() == false) {
-                    if (currentPlaylistName.equals(nameToClear)) {
-                        binding.editTextPlaylistName.setText("");
-                        currentPlaylistName = "";
-                        LoadOrReloadMusicService();
-                    }
+
+                Toast.makeText(this, "Playlist '" + deletedName + "' deleted", Toast.LENGTH_SHORT).show();
+                MainActivity.playlistModified = true; // Tell MainActivity that something changed!
+
+                // We need to reload the music service if the playlist currently playing is deleted!
+                if (nameToClear.equals(currentPlaylistName)) {
+                    LoadOrReloadMusicService();
                 }
 
-                trackList.clear();
-                if (trackAdapter != null) {
-                    trackAdapter.notifyDataSetChanged();
-                }
-
-                updateTracksCountUI();
-                Toast.makeText(this, "Playlist deleted", Toast.LENGTH_SHORT).show();
-
-                MainActivity.playlistModified = true;
+                finish(); // Return to MainActivity after deleting the playlist
             });
         });
     }
