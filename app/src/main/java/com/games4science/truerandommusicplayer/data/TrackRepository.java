@@ -56,10 +56,12 @@ public class TrackRepository {
         });
     }
 
-    public static void createPlaylist(Context context, String playlistName) {
+    public static void createPlaylist(Context context, String playlistName, RepositoryCallback<Long> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            dao.createPlaylist(new Playlist(playlistName));
+            long id = dao.createPlaylist(new Playlist(playlistName));
+
+            callback.onComplete(id);
         });
     }
 

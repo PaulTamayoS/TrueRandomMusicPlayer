@@ -327,19 +327,20 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     return;
                 }
 
-                TrackRepository.createPlaylist(this, name);
+                TrackRepository.createPlaylist(this, name, id -> {
+                    runOnUiThread(() -> {
+                        this.currentPlaylistName = name;
+                        binding.editTextPlaylistName.setText(name);
+                        MainActivity.playlistModified = true;
 
-                this.currentPlaylistName = name;
-                binding.editTextPlaylistName.setText(name);
-                MainActivity.playlistModified = true;
-
-                trackList.clear();
-                if (trackAdapter != null) {
-                    trackAdapter.notifyDataSetChanged();
-                }
-                updateTracksCountUI();
-
-                Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
+                        trackList.clear();
+                        if (trackAdapter != null) {
+                            trackAdapter.notifyDataSetChanged();
+                        }
+                        updateTracksCountUI();
+                        Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
+                    });
+                });
             });
         });
     }
