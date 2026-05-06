@@ -134,30 +134,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void executeDeletePlaylist(String nameToClear) {
-        TrackRepository.deletePlaylistByName(this, nameToClear, s -> {
-            runOnUiThread(() -> {
-                // We need to reload the music service if the playlist currently playing is modified
-                if (currentPlaylistName != null && currentPlaylistName.isEmpty() == false) {
-                    if (currentPlaylistName.equals(nameToClear)) {
-                        binding.editTextPlaylistName.setText("");
-                        currentPlaylistName = "";
-                        LoadOrReloadMusicService();
-                    }
-                }
 
-                trackList.clear();
-                if (trackAdapter != null) {
-                    trackAdapter.notifyDataSetChanged();
-                }
-
-                updateTracksCountUI();
-                Toast.makeText(this, "Playlist deleted", Toast.LENGTH_SHORT).show();
-
-                MainActivity.playlistModified = true;
-            });
-        });
-    }
 
     private void openPicker(View v) {
         androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, v);
@@ -341,6 +318,31 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                         Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
                     });
                 });
+            });
+        });
+    }
+
+    private void executeDeletePlaylist(String nameToClear) {
+        TrackRepository.deletePlaylistByName(this, nameToClear, s -> {
+            runOnUiThread(() -> {
+                // We need to reload the music service if the playlist currently playing is modified
+                if (currentPlaylistName != null && currentPlaylistName.isEmpty() == false) {
+                    if (currentPlaylistName.equals(nameToClear)) {
+                        binding.editTextPlaylistName.setText("");
+                        currentPlaylistName = "";
+                        LoadOrReloadMusicService();
+                    }
+                }
+
+                trackList.clear();
+                if (trackAdapter != null) {
+                    trackAdapter.notifyDataSetChanged();
+                }
+
+                updateTracksCountUI();
+                Toast.makeText(this, "Playlist deleted", Toast.LENGTH_SHORT).show();
+
+                MainActivity.playlistModified = true;
             });
         });
     }
