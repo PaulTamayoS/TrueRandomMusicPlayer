@@ -82,26 +82,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         });
     }
 
-    private void confirmTrackRemoval(String uri, int position) {
-        new AlertDialog.Builder(this)
-                .setTitle("Remove Track")
-                .setMessage("Remove this song from the playlist?")
-                .setPositiveButton("Remove", (dialog, which) -> {
-
-                    TrackRepository.removeSingleTrack(this, currentPlaylistName, uri);
-
-                    trackList.remove(position);
-                    trackAdapter.notifyItemRemoved(position);
-                    trackAdapter.notifyItemRangeChanged(position, trackList.size() - position);
-                    updateTracksCountUI();
-
-                    MainActivity.playlistModified = true;
-                    LoadOrReloadMusicService();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
     private void LoadOrReloadMusicService()
     {
         // Get the name of the playlist being edited
@@ -120,22 +100,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     //region UI Listeners
 
-    private void OnClickBtnDeleteLibrary() {
-        String currentName = binding.editTextPlaylistName.getText().toString().trim();
-
-        // Create the confirmation dialog
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Playlist")
-                .setMessage("Are you sure you want to delete the playlist '" + currentName + "'? This cannot be undone.")
-                .setPositiveButton("Delete Playlist", (dialog, which) -> {
-                    executeDeletePlaylist(currentName);
-                })
-                .setNegativeButton("Cancel", null) // Does nothing and closes dialog
-                .show();
-    }
-
-
-
     private void openPicker(View v) {
         androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, v);
         popup.getMenu().add("Select Files");
@@ -150,6 +114,20 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             return true;
         });
         popup.show();
+    }
+
+    private void OnClickBtnDeleteLibrary() {
+        String currentName = binding.editTextPlaylistName.getText().toString().trim();
+
+        // Create the confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Playlist")
+                .setMessage("Are you sure you want to delete the playlist '" + currentName + "'? This cannot be undone.")
+                .setPositiveButton("Delete Playlist", (dialog, which) -> {
+                    executeDeletePlaylist(currentName);
+                })
+                .setNegativeButton("Cancel", null) // Does nothing and closes dialog
+                .show();
     }
 
     private void handleDoneAndExit() {
@@ -193,6 +171,26 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     if (!name.isEmpty()) {
                         createNewPlaylist(name);
                     }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmTrackRemoval(String uri, int position) {
+        new AlertDialog.Builder(this)
+                .setTitle("Remove Track")
+                .setMessage("Remove this song from the playlist?")
+                .setPositiveButton("Remove", (dialog, which) -> {
+
+                    TrackRepository.removeSingleTrack(this, currentPlaylistName, uri);
+
+                    trackList.remove(position);
+                    trackAdapter.notifyItemRemoved(position);
+                    trackAdapter.notifyItemRangeChanged(position, trackList.size() - position);
+                    updateTracksCountUI();
+
+                    MainActivity.playlistModified = true;
+                    LoadOrReloadMusicService();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
