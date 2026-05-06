@@ -63,6 +63,34 @@ public class TrackRepository {
         });
     }
 
+    public static void deletePlaylistByName(Context context, String playlistName, RepositoryCallback<String> callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
+            dao.deletePlaylistByName(playlistName);
+
+            callback.onComplete(playlistName);
+        });
+    }
+
+    public static void renamePlaylist(Context context, String currentPlaylistName, String newName, RepositoryCallback<Boolean> callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
+            try {
+                // Check if the new name is already taken by a DIFFERENT playlist
+                long existingId = dao.getPlaylistIdByName(newName);
+                if (existingId != 0) {
+                    callback.onComplete(false); // Name already exists!
+                    return;
+                }
+
+                dao.renamePlaylist(currentPlaylistName, newName);
+                callback.onComplete(true);
+            } catch (Exception e) {
+                callback.onComplete(false);
+            }
+        });
+    }
+
     /**
      * Used for FILE(S) selection (User picked the file(s) directly)
      */
@@ -172,7 +200,7 @@ public class TrackRepository {
         return new Track(title, uri.toString(), artist);
     }
 
-    public static void getTracks(Context context, String playlistName, RepositoryCallback<List<MediaItem>> callback) {
+    public static void getTracksAsListMediaItems(Context context, String playlistName, RepositoryCallback<List<MediaItem>> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
             List<Track> dbTracks = dao.getTracksForPlaylist(playlistName);
@@ -216,34 +244,6 @@ public class TrackRepository {
             int pId = (int) dao.getPlaylistIdByName(playlistName);
             // This removes ONE instance (decreases weight by 1)
             dao.removeOneInstance(pId, uriToRemove);
-        });
-    }
-
-    public static void deletePlaylistByName(Context context, String playlistName, RepositoryCallback<String> callback) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            dao.deletePlaylistByName(playlistName);
-
-            callback.onComplete(playlistName);
-        });
-    }
-
-    public static void renamePlaylist(Context context, String currentPlaylistName, String newName, RepositoryCallback<Boolean> callback) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            try {
-                // Check if the new name is already taken by a DIFFERENT playlist
-                long existingId = dao.getPlaylistIdByName(newName);
-                if (existingId != 0) {
-                    callback.onComplete(false); // Name already exists!
-                    return;
-                }
-
-                dao.renamePlaylist(currentPlaylistName, newName);
-                callback.onComplete(true);
-            } catch (Exception e) {
-                callback.onComplete(false);
-            }
         });
     }
 }

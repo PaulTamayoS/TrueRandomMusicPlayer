@@ -123,7 +123,7 @@ public class MusicService extends MediaSessionService {
                 ? MyConstants.DEFAULT_PLAYLIST_NAME
                 : playlistName;
 
-        TrackRepository.getTracks(this, finalPlaylistName, tracks -> {
+        TrackRepository.getTracksAsListMediaItems(this, finalPlaylistName, tracks -> {
             getMainExecutor().execute(() -> {
                 if (tracks == null || tracks.isEmpty()) {
                     Toast.makeText(MusicService.this,
