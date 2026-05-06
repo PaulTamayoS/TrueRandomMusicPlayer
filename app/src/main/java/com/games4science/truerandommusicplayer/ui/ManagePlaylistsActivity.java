@@ -1,5 +1,6 @@
 package com.games4science.truerandommusicplayer.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -50,18 +51,13 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         loadTracksIntoList();
 
         binding.editTextPlaylistName.setText(currentPlaylistName); // TODO: Check if can reduce the number of times that I use currentPlaylistName and reading editTextPlaylistName
-        updateSongCountUI();
 
         setupButtons();
     }
 
-    private void updateSongCountUI() { // TODO: almost always called after updateSongCountUI(); check if call it at the end of that method
-        String currentName = binding.editTextPlaylistName.getText().toString().trim();
-        TrackRepository.getTracksCountByPlaylistName(this, currentName, count -> {
-            runOnUiThread(() -> {
-                binding.tvTotalSongsInPlaylist.setText(count + " Songs in this Playlist");
-            });
-        });
+    @SuppressLint("SetTextI18n")
+    private void updateTracksCountUI() {
+        binding.tvTotalSongsInPlaylist.setText(trackList.size() + " Songs in this Playlist");
     }
 
     private void setupButtons() {
@@ -81,6 +77,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 if (trackAdapter != null) {
                     trackAdapter.notifyDataSetChanged();
                 }
+                updateTracksCountUI();
             });
         });
     }
@@ -96,7 +93,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     trackList.remove(position);
                     trackAdapter.notifyItemRemoved(position);
                     trackAdapter.notifyItemRangeChanged(position, trackList.size() - position);
-                    updateSongCountUI();
+                    updateTracksCountUI();
 
                     MainActivity.playlistModified = true;
                     LoadOrReloadMusicService();
@@ -154,7 +151,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     trackAdapter.notifyDataSetChanged();
                 }
 
-                updateSongCountUI();
+                updateTracksCountUI();
                 Toast.makeText(this, "Playlist deleted", Toast.LENGTH_SHORT).show();
 
                 MainActivity.playlistModified = true;
@@ -275,7 +272,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                                         currentPlaylistName = localNameToSaveTo;
                                         loadTracksIntoList();
                                         LoadOrReloadMusicService();
-                                        updateSongCountUI();
                                         Toast.makeText(this, "Added " + countAdded + " tracks!", Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -310,7 +306,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                                     loadTracksIntoList();
                                     LoadOrReloadMusicService();
-                                    updateSongCountUI();
                                     Toast.makeText(this, "Scan complete! Total tracks added = " + addedTracks.size(), Toast.LENGTH_SHORT).show();
                                 });
                             });
@@ -329,9 +324,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (existingNames.contains(name)) {
                     Toast.makeText(this, "Playlist '" + name + "' already exists!", Toast.LENGTH_SHORT).show();
-                    this.currentPlaylistName = name;
-                    binding.editTextPlaylistName.setText(name);
-                    updateSongCountUI();
                     return;
                 }
 
@@ -340,7 +332,13 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 this.currentPlaylistName = name;
                 binding.editTextPlaylistName.setText(name);
                 MainActivity.playlistModified = true;
-                updateSongCountUI(); // Refresh the UI to show 0 tracks
+
+                trackList.clear();
+                if (trackAdapter != null) {
+                    trackAdapter.notifyDataSetChanged();
+                }
+                updateTracksCountUI();
+
                 Toast.makeText(this, "Playlist '" + name + "' created!", Toast.LENGTH_SHORT).show();
             });
         });
