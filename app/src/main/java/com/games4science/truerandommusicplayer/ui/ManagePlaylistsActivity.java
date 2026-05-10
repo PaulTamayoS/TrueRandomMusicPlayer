@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.databinding.ActivityManagePlaylistsBinding;
+import com.games4science.truerandommusicplayer.model.Playlist;
 import com.games4science.truerandommusicplayer.model.Track;
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.ui.adapters.TrackAdapter;
@@ -27,7 +28,8 @@ import java.util.List;
 public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private ActivityManagePlaylistsBinding binding;
-    private String currentPlaylistName = ""; // Used if we are editing an existing list
+    private String initialPlaylistName = ""; // Used if we are editing an existing list
+    private long currentPlaylistId = -1;
 
     private TrackAdapter trackAdapter;
     private final List<Track> trackList = new ArrayList<>();
@@ -39,10 +41,8 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Check if we are EDITING an existing playlist
-        currentPlaylistName = getIntent().getStringExtra(MyConstants.EXTRA_PLAYLIST_NAME_TO_EDIT);
-        if (currentPlaylistName == null || currentPlaylistName.isEmpty()) {
-            currentPlaylistName = MyConstants.DEFAULT_PLAYLIST_NAME;
-        }
+        currentPlaylistId = getIntent().getLongExtra(MyConstants.EXTRA_PLAYLIST_ID_TO_EDIT, -1);
+        initialPlaylistName = getIntent().getStringExtra(MyConstants.EXTRA_PLAYLIST_NAME_TO_EDIT);
 
         binding.rvTrackList.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
         trackAdapter = new TrackAdapter(trackList, (uri, position) -> confirmTrackRemoval(uri, position));
@@ -50,7 +50,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         loadTracksIntoList();
 
-        binding.editTextPlaylistName.setText(currentPlaylistName); // TODO: Check if can reduce the number of times that I use currentPlaylistName and reading editTextPlaylistName
+        binding.editTextPlaylistName.setText(initialPlaylistName); // TODO: Check if can reduce the number of times that I use currentPlaylistName and reading editTextPlaylistName
 
         setupButtons();
     }
@@ -68,7 +68,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     }
 
     private void loadTracksIntoList() {
-        TrackRepository.getTracksAsModels(this, currentPlaylistName, tracks -> {
+        TrackRepository.getTracksAsModels(this, currentPlaylistId, tracks -> {
             runOnUiThread(() -> {
                 trackList.clear();
                 if (tracks != null) {
@@ -85,11 +85,11 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     private void LoadOrReloadMusicService()
     {
         // Get the name of the playlist being edited
-        String nameToLoad = binding.editTextPlaylistName.getText().toString().trim();
+        String nameToLoad = binding.editTextPlaylistName.getText().toString().trim(); // TODO: check if can read from variable instead
 
         // Fallback if empty
         if (nameToLoad.isEmpty()) {
-            nameToLoad = currentPlaylistName;
+            nameToLoad = initialPlaylistName; // TODO: check if necessary
         }
 
         Intent serviceIntent = new Intent(this, MusicService.class);
@@ -117,14 +117,14 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     }
 
     private void OnClickBtnDeleteLibrary() {
-        String currentName = binding.editTextPlaylistName.getText().toString().trim();
+        //String currentName = binding.editTextPlaylistName.getText().toString().trim();
 
         // Create the confirmation dialog
         new AlertDialog.Builder(this)
                 .setTitle("Delete Playlist")
-                .setMessage("Are you sure you want to delete the playlist '" + currentName + "'? This cannot be undone.")
+                .setMessage("Are you sure you want to delete the playlist '" + initialPlaylistName + "'? This cannot be undone.")
                 .setPositiveButton("Delete Playlist", (dialog, which) -> {
-                    executeDeletePlaylist(currentName);
+                    executeDeletePlaylist(initialPlaylistName, currentPlaylistId);
                 })
                 .setNegativeButton("Cancel", null) // Does nothing and closes dialog
                 .show();
@@ -138,13 +138,13 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             return;
         }
 
-        if (newName.equals(currentPlaylistName)) {
+        if (newName.equals(initialPlaylistName)) {
             finish(); // No changes made
             return;
         }
 
         // If the user changed the name in the EditText, perform a rename
-        TrackRepository.renamePlaylist(this, currentPlaylistName, newName, success -> {
+        TrackRepository.renamePlaylistById(this, currentPlaylistId, newName, success -> {
             runOnUiThread(() -> {
                 if (success) {
                     MainActivity.playlistModified = true; // Tell MainActivity that something changed!
@@ -182,7 +182,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 .setMessage("Remove this song from the playlist?")
                 .setPositiveButton("Remove", (dialog, which) -> {
 
-                    TrackRepository.removeSingleTrack(this, currentPlaylistName, uri);
+                    TrackRepository.removeSingleTrack(this, initialPlaylistName, uri); //TODO: should use ID instead of playlist name
 
                     trackList.remove(position);
                     trackAdapter.notifyItemRemoved(position);
@@ -234,16 +234,17 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                             String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
                             if (nameToSaveTo.isEmpty()) {
-                                nameToSaveTo = currentPlaylistName;
+                                nameToSaveTo = initialPlaylistName; // TODO: no need to do this if saveTracksFromFilesPicker uses ID instead
                             }
                             String localNameToSaveTo = nameToSaveTo;
 
+                            //TODO: should use id instead of string name
                             TrackRepository.saveTracksFromFilesPicker(this, nameToSaveTo, urisToProcess, countAdded -> {
                                 // ONLY update the UI once the background work is fully DONE
                                 runOnUiThread(() -> {
                                     if (countAdded > 0) {
                                         MainActivity.playlistModified = true;
-                                        currentPlaylistName = localNameToSaveTo;
+                                        initialPlaylistName = localNameToSaveTo; //TODO: no need to do this if saveTracksFromFilesPicker uses ID instead
                                         loadTracksIntoList();
                                         LoadOrReloadMusicService();
                                         Toast.makeText(this, "Added " + countAdded + " tracks!", Toast.LENGTH_SHORT).show();
@@ -267,16 +268,17 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                         try {
                             String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
                             if (nameToSaveTo.isEmpty()) {
-                                nameToSaveTo = currentPlaylistName;
+                                nameToSaveTo = initialPlaylistName; // TODO: no need to do this if saveTracksFromFolder uses ID instead
                             }
 
                             String playlistName = nameToSaveTo;
 
+                            // TODO: use ID instead of playlistName
                             // The heavy lifting happens here
                             TrackRepository.saveTracksFromFolder(this, playlistName, folderUri, addedTracks -> {
                                 runOnUiThread(() -> {
                                     MainActivity.playlistModified = true;
-                                    currentPlaylistName = playlistName;
+                                    initialPlaylistName = playlistName; // TODO: no need to do this if saveTracksFromFolder uses ID instead
 
                                     loadTracksIntoList();
                                     LoadOrReloadMusicService();
@@ -294,16 +296,19 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             });
 
     private void createNewPlaylist(String name) {
-        TrackRepository.getAllPlaylistNames(this, existingNames -> {
+        TrackRepository.getAllPlaylists(this, existingPlaylists -> {
             runOnUiThread(() -> {
-                if (existingNames.contains(name)) {
-                    Toast.makeText(this, "Playlist '" + name + "' already exists!", Toast.LENGTH_SHORT).show();
-                    return;
+
+                for (Playlist p : existingPlaylists) {
+                    if (p.playlistName.equals(name)) {
+                        Toast.makeText(this, "Playlist '" + name + "' already exists!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }
 
                 TrackRepository.createPlaylist(this, name, id -> {
                     runOnUiThread(() -> {
-                        this.currentPlaylistName = name;
+                        this.initialPlaylistName = name; //TODO: check if initialPlaylistName is the correct one, or should I create another. Or just a renaming list currentPlaylistName
                         binding.editTextPlaylistName.setText(name);
                         MainActivity.playlistModified = true;
 
@@ -319,15 +324,15 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         });
     }
 
-    private void executeDeletePlaylist(String nameToClear) {
-        TrackRepository.deletePlaylistByName(this, nameToClear, deletedName -> {
+    private void executeDeletePlaylist(String nameToClear, long playlistId) {
+        TrackRepository.deletePlaylistById(this, playlistId, deletedName -> {
             runOnUiThread(() -> {
 
                 Toast.makeText(this, "Playlist '" + deletedName + "' deleted", Toast.LENGTH_SHORT).show();
                 MainActivity.playlistModified = true; // Tell MainActivity that something changed!
 
                 // We need to reload the music service if the playlist currently playing is deleted!
-                if (nameToClear.equals(currentPlaylistName)) {
+                if (nameToClear.equals(initialPlaylistName)) { // TODO: check if needed
                     LoadOrReloadMusicService();
                 }
 
