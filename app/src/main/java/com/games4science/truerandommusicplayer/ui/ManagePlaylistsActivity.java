@@ -50,7 +50,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
         loadTracksIntoList();
 
-        binding.editTextPlaylistName.setText(initialPlaylistName); // TODO: Check if can reduce the number of times that I use currentPlaylistName and reading editTextPlaylistName
+        binding.editTextPlaylistName.setText(initialPlaylistName);
 
         setupButtons();
     }
@@ -279,7 +279,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 TrackRepository.createPlaylist(this, name, id -> {
                     runOnUiThread(() -> {
                         currentPlaylistId = id;
-                        this.initialPlaylistName = name; //TODO: check if initialPlaylistName is the correct one, or should I create another. Or just a renaming list currentPlaylistName
+                        this.initialPlaylistName = name;
                         binding.editTextPlaylistName.setText(name);
                         MainActivity.playlistModified = true;
 
