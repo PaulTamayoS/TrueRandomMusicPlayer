@@ -118,16 +118,11 @@ public class MusicService extends MediaSessionService {
     }
 
     private void loadPlaylist(String playlistName) {
-        // If no name is provided (like on initial boot), use our default playlist name
-        final String finalPlaylistName = (playlistName == null || playlistName.isEmpty())
-                ? MyConstants.DEFAULT_PLAYLIST_NAME
-                : playlistName;
-
-        TrackRepository.getTracksAsListMediaItems(this, finalPlaylistName, tracks -> {
+        TrackRepository.getTracksAsListMediaItems(this, playlistName, tracks -> {
             getMainExecutor().execute(() -> {
                 if (tracks == null || tracks.isEmpty()) {
                     Toast.makeText(MusicService.this,
-                            "The playlist '" + finalPlaylistName + "' is empty!",
+                            "The playlist '" + playlistName + "' is empty!",
                             Toast.LENGTH_SHORT).show();
                     player.stop();
                     player.clearMediaItems();
