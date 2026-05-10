@@ -12,20 +12,14 @@ public interface LibraryDao {
 
     // --- INSERTS ---
 
-    // Insert a song. If it already exists, ignore it (to prevent duplicates)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long createPlaylist(Playlist playlist);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertTrack(Track track);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertTracks(List<Track> tracks);
-
-    // create a new playlist name
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    long createPlaylist(Playlist playlist);
-
-    // Add a song to a playlist
-    @Insert
-    void addTrackToPlaylist(JoinPlaylistTrack join);
 
     @Insert
     void addTracksToPlaylist(List<JoinPlaylistTrack> joins);
@@ -45,15 +39,18 @@ public interface LibraryDao {
             "WHERE P.playlistName = :pName")
     List<Track> getTracksForPlaylist(String pName);
 
-    @Query("SELECT COUNT(*) FROM join_playlist_track J " +
-            "INNER JOIN playlists P ON P.playlistId = J.playlistId " +
-            "WHERE P.playlistName = :pName")
-    int getTracksCountForPlaylist(String pName);
+    @Query("SELECT T.* FROM tracks T " +
+            "INNER JOIN join_playlist_track J ON T.uriString = J.uriString " +
+            "WHERE J.playlistId = :pId")
+    List<Track> getTracksByPlaylistId(long pId);
+
+    @Query("SELECT COUNT(*) FROM join_playlist_track WHERE playlistId = :pId")
+    int getTracksCountByPlaylistId(long pId);
 
     // --- UPDATES ---
 
-    @Query("UPDATE playlists SET playlistName = :newName WHERE playlistName = :currentPlaylistName ")
-    void renamePlaylist(String currentPlaylistName, String newName);
+    @Query("UPDATE playlists SET playlistName = :newName WHERE playlistId = :pId")
+    void renamePlaylistById(long pId, String newName);
 
     // --- DELETES ---
 
@@ -68,12 +65,8 @@ public interface LibraryDao {
     @Delete
     void deleteTrackCompletely(Track track);
 
-    // Deletes the playlist (cascades to remove all track links automatically)
-    @Delete
-    void deletePlaylist(Playlist playlist);
-
-    @Query("DELETE FROM playlists WHERE playlistName = :playlist ")
-    void deletePlaylistByName(String playlist);
+    @Query("DELETE FROM playlists WHERE playlistId = :pId")
+    void deletePlaylistById(long pId);
 
     // Quick helper to clear a playlist by name without having the Playlist object
     @Query("DELETE FROM join_playlist_track WHERE playlistId IN (SELECT playlistId FROM playlists WHERE playlistName = :pName)")
