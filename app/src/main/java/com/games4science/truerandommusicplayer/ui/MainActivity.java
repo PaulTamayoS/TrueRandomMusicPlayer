@@ -20,6 +20,7 @@ import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainAct
 import com.games4science.truerandommusicplayer.MainActivityHelperClasses.MainActivityUiController;
 import com.games4science.truerandommusicplayer.R;
 import com.games4science.truerandommusicplayer.databinding.ActivityMainBinding;
+import com.games4science.truerandommusicplayer.model.Playlist;
 import com.games4science.truerandommusicplayer.player.MusicService;
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.util.MyConstants;
@@ -29,6 +30,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.media3.common.MediaItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler progressHandler = new Handler(Looper.getMainLooper());
 
     private String[] playlists = {MyConstants.DEFAULT_PLAYLIST_NAME};
+    public List<Playlist> playlistObjects = new ArrayList<>();
     public static boolean playlistModified = false;
     private boolean isSpinnerTouched = false;
     private boolean isControllerSuccessfullyConnected = false;
@@ -153,9 +158,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void OnResumeRefreshPlaylistSpinner() {
-        TrackRepository.getAllPlaylistNames(this, namesFromRepo -> {
+        TrackRepository.getAllPlaylists(this, existingPlaylists -> {
             runOnUiThread(() -> {
-                playlists = namesFromRepo.toArray(new String[0]);
+                playlistObjects = existingPlaylists;
+                playlists = new String[existingPlaylists.size()];
+
+                for (int i = 0; i < existingPlaylists.size(); i++) {
+                    playlists[i] = existingPlaylists.get(i).playlistName;
+                }
+
                 uiController.ReloadDropDownSpinnerPlaylists(playlists);
 
                 // Get the last known playlist name
@@ -225,8 +236,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                String selected = playlists[position];
-
                 // If we aren't connected yet, just sync the variable and wait. This prevents the "Auto-Selection" on boot from triggering a load.
                 if (!isControllerSuccessfullyConnected) {
                     return;
@@ -237,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 isSpinnerTouched = false;
-                triggerPlaylistLoad(selected);
+                triggerPlaylistLoad(playlists[position]);
             }
 
             @Override
