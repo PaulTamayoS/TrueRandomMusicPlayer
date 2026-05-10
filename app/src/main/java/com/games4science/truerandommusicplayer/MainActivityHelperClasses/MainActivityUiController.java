@@ -84,6 +84,11 @@ public class MainActivityUiController {
         return binding.spinnerPlaylists.getSelectedItem().toString();
     }
 
+    public int GetSelectedPlayListPosition()
+    {
+        return binding.spinnerPlaylists.getSelectedItemPosition();
+    }
+
     public void ReloadDropDownSpinnerPlaylists(String[] playlists)
     {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
