@@ -84,17 +84,9 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
     private void LoadOrReloadMusicService()
     {
-        // Get the name of the playlist being edited
-        String nameToLoad = binding.editTextPlaylistName.getText().toString().trim(); // TODO: check if can read from variable instead
-
-        // Fallback if empty
-        if (nameToLoad.isEmpty()) {
-            nameToLoad = initialPlaylistName; // TODO: check if necessary
-        }
-
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction(MyConstants.ACTION_LOAD_PLAYLIST);
-        serviceIntent.putExtra(MyConstants.EXTRA_PLAYLIST_NAME, nameToLoad);
+        serviceIntent.putExtra(MyConstants.EXTRA_PLAYLIST_NAME, initialPlaylistName);
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 
@@ -117,9 +109,6 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     }
 
     private void OnClickBtnDeleteLibrary() {
-        //String currentName = binding.editTextPlaylistName.getText().toString().trim();
-
-        // Create the confirmation dialog
         new AlertDialog.Builder(this)
                 .setTitle("Delete Playlist")
                 .setMessage("Are you sure you want to delete the playlist '" + initialPlaylistName + "'? This cannot be undone.")
