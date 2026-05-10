@@ -31,28 +31,18 @@ public class TrackRepository {
     /**
      * Gets all available playlist names for the Spinner
      */
-    public static void getAllPlaylistNames(Context context, RepositoryCallback<List<String>> callback) {
+    public static void getAllPlaylists(Context context, RepositoryCallback<List<Playlist>> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
             List<Playlist> playlists = dao.getAllPlaylists();
-            List<String> names = new ArrayList<>();
-            for (Playlist p : playlists) {
-                if (!names.contains(p.playlistName)) {
-                    names.add(p.playlistName);
-                }
-            }
 
-            // Ensure default playlist exists in DB if it's missing
-            if (!names.contains(MyConstants.DEFAULT_PLAYLIST_NAME)) {
+            //If there are 0 playlists, we create a default one
+            if (playlists.isEmpty()) {
                 dao.createPlaylist(new Playlist(MyConstants.DEFAULT_PLAYLIST_NAME));
-                names.add(0, MyConstants.DEFAULT_PLAYLIST_NAME);
-            } else {
-                // Move it to the start if it exists elsewhere
-                names.remove(MyConstants.DEFAULT_PLAYLIST_NAME);
-                names.add(0, MyConstants.DEFAULT_PLAYLIST_NAME);
+                playlists = dao.getAllPlaylists();
             }
 
-            callback.onComplete(names);
+            callback.onComplete(playlists);
         });
     }
 
@@ -65,27 +55,26 @@ public class TrackRepository {
         });
     }
 
-    public static void deletePlaylistByName(Context context, String playlistName, RepositoryCallback<String> callback) {
+    public static void deletePlaylistById(Context context, long playlistId, RepositoryCallback<Boolean> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            dao.deletePlaylistByName(playlistName);
-
-            callback.onComplete(playlistName);
+            dao.deletePlaylistById(playlistId);
+            callback.onComplete(true);
         });
     }
 
-    public static void renamePlaylist(Context context, String currentPlaylistName, String newName, RepositoryCallback<Boolean> callback) {
+    public static void renamePlaylistById(Context context, long playlistId, String newName, RepositoryCallback<Boolean> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
             try {
                 // Check if the new name is already taken by a DIFFERENT playlist
                 long existingId = dao.getPlaylistIdByName(newName);
-                if (existingId != 0) {
+                if (existingId != 0 && existingId != playlistId) {
                     callback.onComplete(false); // Name already exists!
                     return;
                 }
 
-                dao.renamePlaylist(currentPlaylistName, newName);
+                dao.renamePlaylistById(playlistId, newName);
                 callback.onComplete(true);
             } catch (Exception e) {
                 callback.onComplete(false);
@@ -93,6 +82,7 @@ public class TrackRepository {
         });
     }
 
+    // TODO: make it work with ID instead
     /**
      * Used for FILE(S) selection (User picked the file(s) directly)
      */
@@ -132,6 +122,7 @@ public class TrackRepository {
         });
     }
 
+    // TODO: make it work with ID instead
     /**
      * Used for FOLDER selection (User picked the folder)
      */
@@ -223,23 +214,23 @@ public class TrackRepository {
         });
     }
 
-    public static void getTracksAsModels(Context context, String playlistName, RepositoryCallback<List<Track>> callback) {
+    public static void getTracksAsModels(Context context, long playlistId, RepositoryCallback<List<Track>> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            List<Track> dbTracks = dao.getTracksForPlaylist(playlistName);
+            List<Track> dbTracks = dao.getTracksByPlaylistId(playlistId);
             callback.onComplete(dbTracks);
         });
     }
 
-    public static void getTracksCountByPlaylistName(Context context, String playlistName, RepositoryCallback<Integer> callback)
-    {
+    public static void getTracksCountByPlaylistId(Context context, long playlistId, RepositoryCallback<Integer> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            int count = dao.getTracksCountForPlaylist(playlistName);
+            int count = dao.getTracksCountByPlaylistId(playlistId);
             callback.onComplete(count);
         });
     }
 
+    // TODO: make it work with ID instead
     public static void removeSingleTrack(Context context, String playlistName, String uriToRemove) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
