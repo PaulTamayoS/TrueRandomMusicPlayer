@@ -25,7 +25,7 @@ import androidx.room.PrimaryKey;
 public class JoinPlaylistTrack {
 
     @PrimaryKey(autoGenerate = true)
-    public int joinId;
+    public long joinId;
 
     public long playlistId;
 

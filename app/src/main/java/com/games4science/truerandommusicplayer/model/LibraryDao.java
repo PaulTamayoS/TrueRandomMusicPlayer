@@ -59,7 +59,7 @@ public interface LibraryDao {
     void removeTrackFromPlaylist(JoinPlaylistTrack join);
 
     @Query("DELETE FROM join_playlist_track WHERE joinId = (SELECT joinId FROM join_playlist_track WHERE playlistId = :pId AND uriString = :uStr LIMIT 1)")
-    void removeOneInstance(int pId, String uStr);
+    void removeOneInstance(long pId, String uStr);
 
     // Removes the track entirely from the library (cascades to all playlists)
     @Delete
@@ -73,5 +73,5 @@ public interface LibraryDao {
     void clearPlaylistByName(String pName);
 
     @Query("DELETE FROM join_playlist_track WHERE playlistId = :pId AND uriString = :uStr")
-    void removeAllInstancesOfTrackFromPlaylist(int pId, String uStr);
+    void removeAllInstancesOfTrackFromPlaylist(long pId, String uStr);
 }

@@ -82,20 +82,14 @@ public class TrackRepository {
         });
     }
 
-    // TODO: make it work with ID instead
     /**
      * Used for FILE(S) selection (User picked the file(s) directly)
      */
-    public static void saveTracksFromFilesPicker(Context context, String playlistName, List<Uri> uris, RepositoryCallback<Integer> callback) {
+    public static void saveTracksFromFilesPicker(Context context, long playlistId, List<Uri> uris, RepositoryCallback<Integer> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             int count = 0;
             try {
                 LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-                long pId = dao.createPlaylist(new Playlist(playlistName));
-                if (pId == -1) { // If createPlaylist returns -1, it already existed, so we find its ID
-                    pId = dao.getPlaylistIdByName(playlistName);
-                }
-
                 List<JoinPlaylistTrack> joins = new ArrayList<>();
                 for (Uri uri : uris) {
                     try {
@@ -105,7 +99,7 @@ public class TrackRepository {
                         Track track = getTrackMetadata(context, uri);
                         dao.insertTrack(track);
 
-                        joins.add(new JoinPlaylistTrack((int) pId, uri.toString()));
+                        joins.add(new JoinPlaylistTrack(playlistId, uri.toString()));
                         count++;
                     } catch (SecurityException ignored) {
                         // Not a persistable URI, ignore and continue
@@ -122,32 +116,25 @@ public class TrackRepository {
         });
     }
 
-    // TODO: make it work with ID instead
     /**
      * Used for FOLDER selection (User picked the folder)
      */
-    public static void saveTracksFromFolder(Context context, String playlistName, Uri folderUri, RepositoryCallback<List<Track>> callback) {
+    public static void saveTracksFromFolder(Context context, long playlistId, Uri folderUri, RepositoryCallback<List<Track>> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             DocumentFile rootFolder = DocumentFile.fromTreeUri(context, folderUri);
-            if (rootFolder == null || !rootFolder.isDirectory()) return;
+            if (rootFolder == null || !rootFolder.isDirectory()) {
+                return;
+            }
 
             List<Track> trackBatch = new ArrayList<>();
             scanDirectoryRecursive(context, rootFolder, trackBatch);
 
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-
-            // Bulk insert master tracks
             dao.insertTracks(trackBatch);
 
-            // Get playlist ID
-            long pId = dao.createPlaylist(new Playlist(playlistName));
-            if (pId == -1)
-                pId = dao.getPlaylistIdByName(playlistName);
-
-            // Create joins
             List<JoinPlaylistTrack> joins = new ArrayList<>();
             for (Track t : trackBatch) {
-                joins.add(new JoinPlaylistTrack((int) pId, t.getUriString()));
+                joins.add(new JoinPlaylistTrack(playlistId, t.getUriString()));
             }
             dao.addTracksToPlaylist(joins);
 
@@ -230,13 +217,10 @@ public class TrackRepository {
         });
     }
 
-    // TODO: make it work with ID instead
-    public static void removeSingleTrack(Context context, String playlistName, String uriToRemove) {
+    public static void removeSingleTrack(Context context, long playlistId, String uriToRemove) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
-            int pId = (int) dao.getPlaylistIdByName(playlistName);
-            // This removes ONE instance (decreases weight by 1)
-            dao.removeOneInstance(pId, uriToRemove);
+            dao.removeOneInstance(playlistId, uriToRemove);
         });
     }
 }

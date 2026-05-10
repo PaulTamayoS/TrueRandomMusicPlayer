@@ -182,7 +182,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 .setMessage("Remove this song from the playlist?")
                 .setPositiveButton("Remove", (dialog, which) -> {
 
-                    TrackRepository.removeSingleTrack(this, initialPlaylistName, uri); //TODO: should use ID instead of playlist name
+                    TrackRepository.removeSingleTrack(this, currentPlaylistId, uri);
 
                     trackList.remove(position);
                     trackAdapter.notifyItemRemoved(position);
@@ -232,19 +232,10 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                             // Show a quick toast so the user knows something is happening
                             Toast.makeText(this, "Adding " + urisToProcess.size() + " files...", Toast.LENGTH_SHORT).show();
 
-                            String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
-                            if (nameToSaveTo.isEmpty()) {
-                                nameToSaveTo = initialPlaylistName; // TODO: no need to do this if saveTracksFromFilesPicker uses ID instead
-                            }
-                            String localNameToSaveTo = nameToSaveTo;
-
-                            //TODO: should use id instead of string name
-                            TrackRepository.saveTracksFromFilesPicker(this, nameToSaveTo, urisToProcess, countAdded -> {
-                                // ONLY update the UI once the background work is fully DONE
+                            TrackRepository.saveTracksFromFilesPicker(this, currentPlaylistId, urisToProcess, countAdded -> {
                                 runOnUiThread(() -> {
                                     if (countAdded > 0) {
                                         MainActivity.playlistModified = true;
-                                        initialPlaylistName = localNameToSaveTo; //TODO: no need to do this if saveTracksFromFilesPicker uses ID instead
                                         loadTracksIntoList();
                                         LoadOrReloadMusicService();
                                         Toast.makeText(this, "Added " + countAdded + " tracks!", Toast.LENGTH_SHORT).show();
@@ -266,20 +257,10 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                     // Run this in a background thread so the UI doesn't freeze
                     new Thread(() -> {
                         try {
-                            String nameToSaveTo = binding.editTextPlaylistName.getText().toString().trim();
-                            if (nameToSaveTo.isEmpty()) {
-                                nameToSaveTo = initialPlaylistName; // TODO: no need to do this if saveTracksFromFolder uses ID instead
-                            }
-
-                            String playlistName = nameToSaveTo;
-
-                            // TODO: use ID instead of playlistName
                             // The heavy lifting happens here
-                            TrackRepository.saveTracksFromFolder(this, playlistName, folderUri, addedTracks -> {
+                            TrackRepository.saveTracksFromFolder(this, currentPlaylistId, folderUri, addedTracks -> {
                                 runOnUiThread(() -> {
                                     MainActivity.playlistModified = true;
-                                    initialPlaylistName = playlistName; // TODO: no need to do this if saveTracksFromFolder uses ID instead
-
                                     loadTracksIntoList();
                                     LoadOrReloadMusicService();
                                     Toast.makeText(this, "Scan complete! Total tracks added = " + addedTracks.size(), Toast.LENGTH_SHORT).show();
@@ -308,6 +289,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
 
                 TrackRepository.createPlaylist(this, name, id -> {
                     runOnUiThread(() -> {
+                        currentPlaylistId = id;
                         this.initialPlaylistName = name; //TODO: check if initialPlaylistName is the correct one, or should I create another. Or just a renaming list currentPlaylistName
                         binding.editTextPlaylistName.setText(name);
                         MainActivity.playlistModified = true;
