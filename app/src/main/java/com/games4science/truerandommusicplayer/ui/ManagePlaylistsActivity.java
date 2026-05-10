@@ -111,9 +111,9 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
     private void OnClickBtnDeleteLibrary() {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Playlist")
-                .setMessage("Are you sure you want to delete the playlist '" + initialPlaylistName + "'? This cannot be undone.")
+                .setMessage("Are you sure you want to delete the playlist? This cannot be undone.")
                 .setPositiveButton("Delete Playlist", (dialog, which) -> {
-                    executeDeletePlaylist(initialPlaylistName, currentPlaylistId);
+                    executeDeletePlaylist(currentPlaylistId);
                 })
                 .setNegativeButton("Cancel", null) // Does nothing and closes dialog
                 .show();
@@ -295,18 +295,11 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         });
     }
 
-    private void executeDeletePlaylist(String nameToClear, long playlistId) {
+    private void executeDeletePlaylist(long playlistId) {
         TrackRepository.deletePlaylistById(this, playlistId, deletedName -> {
             runOnUiThread(() -> {
-
-                Toast.makeText(this, "Playlist '" + deletedName + "' deleted", Toast.LENGTH_SHORT).show();
                 MainActivity.playlistModified = true; // Tell MainActivity that something changed!
-
-                // We need to reload the music service if the playlist currently playing is deleted!
-                if (nameToClear.equals(initialPlaylistName)) { // TODO: check if needed
-                    LoadOrReloadMusicService();
-                }
-
+                LoadOrReloadMusicService();
                 finish(); // Return to MainActivity after deleting the playlist
             });
         });
