@@ -41,6 +41,14 @@
             android:parentActivityName=".ui.MainActivity"
             android:exported="false" />
         <!-- ========================= -->
+        <!--  SERVER SETTINGS ACTIVITY -->
+        <!-- ========================= -->
+        <activity
+            android:name=".ui.ServerSettingsActivity"
+            android:label="Server Settings"
+            android:parentActivityName=".ui.MainActivity"
+            android:exported="false" />
+        <!-- ========================= -->
         <!--        MUSIC SERVICE      -->
         <!-- ========================= -->
         <service
