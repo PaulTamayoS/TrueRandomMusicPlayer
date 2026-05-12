@@ -36,6 +36,12 @@ public class ServerSettingsActivity extends AppCompatActivity {
     }
 
     private void saveAndExit() {
+        saveSettingsToPrefs();
+        finish();
+    }
+
+    private void saveSettingsToPrefs()
+    {
         String url = binding.editTextServerUrl.getText().toString().trim();
         String user = binding.editTextUsername.getText().toString().trim();
         String pass = binding.editTextPassword.getText().toString().trim();
@@ -48,7 +54,6 @@ public class ServerSettingsActivity extends AppCompatActivity {
                 .apply();
 
         Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show();
-        finish();
     }
 
     private void testConnection() {
@@ -61,20 +66,17 @@ public class ServerSettingsActivity extends AppCompatActivity {
             return;
         }
 
-        // Prepare Authentication
-        String salt = String.valueOf(System.currentTimeMillis()); // Use timestamp as salt
-        String token = MyUtils.generateMd5Token(pass, salt);
+        // Save current values to SharedPreferences first so the Interceptor can read them
+        saveSettingsToPrefs();
 
-        // Temporarily rebuild client with current UI values for testing
         RetrofitClient.resetClient();
-        // (In a real app, you'd pass the URL directly to a test method, but this works for now)
-
         SubsonicApi api = RetrofitClient.getSubsonicApi(this);
-        if (api == null) return;
+        if (api == null) {
+            return;
+        }
 
         // Make the call
-        api.ping(user, token, salt, "1.16.1", "TrueRandomMusicPlayer", "json")
-                .enqueue(new retrofit2.Callback<SubsonicResponse>() {
+        api.ping().enqueue(new retrofit2.Callback<SubsonicResponse>() {
                     @Override
                     public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
