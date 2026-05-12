@@ -52,8 +52,6 @@ public class ServerSettingsActivity extends AppCompatActivity {
                 .putString(MyConstants.PREFS_KEY_SERVER_USER, user)
                 .putString(MyConstants.PREFS_KEY_SERVER_PASSWORD, pass)
                 .apply();
-
-        Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show();
     }
 
     private void testConnection() {
