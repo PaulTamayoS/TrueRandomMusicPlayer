@@ -28,6 +28,16 @@
             android:inputType="textUri" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <TextView
+    android:id="@+id/tvHttpWarning"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="⚠️ Warning: Unencrypted HTTP connection. Your data might not be secure on public networks."
+    android:textColor="#FF8800"
+    android:textSize="12sp"
+    android:visibility="gone"
+    android:layout_marginBottom="16dp" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

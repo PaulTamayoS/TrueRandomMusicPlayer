@@ -2,6 +2,9 @@ package com.games4science.truerandommusicplayer.ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,15 +27,28 @@ public class ServerSettingsActivity extends AppCompatActivity {
 
         loadSettings();
 
+        binding.editTextServerUrl.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                checkUrlSecurity(s.toString());
+            }
+        });
+
         binding.btnSaveServer.setOnClickListener(v -> saveAndExit());
         binding.btnTestConnection.setOnClickListener(v -> testConnection());
     }
 
     private void loadSettings() {
         SharedPreferences prefs = getSharedPreferences(MyConstants.PREFS_SERVER_SETTINGS, MODE_PRIVATE);
-        binding.editTextServerUrl.setText(prefs.getString(MyConstants.PREFS_KEY_SERVER_URL, ""));
+        String url = prefs.getString(MyConstants.PREFS_KEY_SERVER_URL, "");
+        binding.editTextServerUrl.setText(url);
         binding.editTextUsername.setText(prefs.getString(MyConstants.PREFS_KEY_SERVER_USER, ""));
         binding.editTextPassword.setText(prefs.getString(MyConstants.PREFS_KEY_SERVER_PASSWORD, ""));
+
+        checkUrlSecurity(url);
     }
 
     private void saveAndExit() {
@@ -95,5 +111,12 @@ public class ServerSettingsActivity extends AppCompatActivity {
                         Toast.makeText(ServerSettingsActivity.this, "Network Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void checkUrlSecurity(String url) {
+        if (url.toLowerCase().startsWith("http://")) {
+            binding.tvHttpWarning.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvHttpWarning.setVisibility(View.GONE); }
     }
 }
