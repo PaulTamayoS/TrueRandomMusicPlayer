@@ -52,12 +52,17 @@ public class MyUtils {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(plainText.getBytes());
             StringBuilder hexString = new StringBuilder();
+
             for (byte b : messageDigest) {
                 String h = Integer.toHexString(0xFF & b);
-                while (h.length() < 2) h = "0" + h;
+                while (h.length() < 2) {
+                    h = "0" + h;
+                }
                 hexString.append(h);
             }
+
             return hexString.toString();
+
         } catch (NoSuchAlgorithmException e) {
             return "";
         }
