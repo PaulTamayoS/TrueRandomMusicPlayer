@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Foreground service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" tools:targetApi="34" /> <!-- Required for media playback foreground services (Android 14+) -->
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Keeps CPU awake during playback -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- External Server API calls need Internet access -->
     <!-- ========================= -->
     <!--        APPLICATION        -->
     <!-- ========================= -->
