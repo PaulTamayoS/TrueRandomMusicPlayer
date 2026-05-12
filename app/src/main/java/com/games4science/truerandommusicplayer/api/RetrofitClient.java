@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,6 +33,8 @@ public class RetrofitClient {
 
             // Create the Auth Interceptor
             OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
                     .addInterceptor(chain -> {
                         Request original = chain.request();
                         HttpUrl originalHttpUrl = original.url();
