@@ -103,11 +103,37 @@ public class ServerSettingsActivity extends AppCompatActivity {
             if (data.getPlaylists() != null && data.getPlaylists().getPlaylist() != null)
             {
                 List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
-                Toast.makeText(this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_SHORT).show();
             }
             else
             {
                 Toast.makeText(this, "Connected, but you have 0 playlists on the server.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void fetchTracks(String playlistId) {
+        SubsonicApi api = RetrofitClient.getSubsonicApi(this);
+
+        if (api == null) {
+            return;
+        }
+
+        executeRequest(api.getPlaylist(playlistId), data -> {
+            if (data.getPlaylist() != null && data.getPlaylist().getEntries() != null)
+            {
+                java.util.List<SubsonicResponse.SongEntry> songs = data.getPlaylist().getEntries();
+
+                for (SubsonicResponse.SongEntry song : songs) {
+                    // Now you have the song title, artist, and ID!
+                    android.util.Log.d("Subsonic", "Found song: " + song.getTitle());
+                }
+
+                Toast.makeText(this, "Fetched " + songs.size() + " songs!", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                Toast.makeText(this, "Playlist has 0 songs!!!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -146,7 +172,7 @@ public class ServerSettingsActivity extends AppCompatActivity {
                         Toast.makeText(ServerSettingsActivity.this, "Server Error: " + msg, Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Toast.makeText(ServerSettingsActivity.this, "HTTP Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ServerSettingsActivity.this, "HTTP Error: " + response.code(), Toast.LENGTH_LONG).show();
                 }
             }
 
