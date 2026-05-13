@@ -6,4 +6,7 @@ import retrofit2.http.GET;
 public interface SubsonicApi {
     @GET("rest/ping.view")
     Call<SubsonicResponse> ping();
+
+    @GET("rest/getPlaylists.view")
+    Call<SubsonicResponse> getPlaylists();
 }

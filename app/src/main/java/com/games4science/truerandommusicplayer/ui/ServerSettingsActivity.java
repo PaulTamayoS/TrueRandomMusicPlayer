@@ -113,6 +113,44 @@ public class ServerSettingsActivity extends AppCompatActivity {
                 });
     }
 
+    private void getPlaylists() {
+        String url = binding.editTextServerUrl.getText().toString().trim();
+        String user = binding.editTextUsername.getText().toString().trim();
+        String pass = binding.editTextPassword.getText().toString().trim();
+
+        if (url.isEmpty() || user.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save current values to SharedPreferences first so the Interceptor can read them
+        saveSettingsToPrefs();
+
+        RetrofitClient.resetClient();
+        SubsonicApi api = RetrofitClient.getSubsonicApi(this);
+        if (api == null) {
+            return;
+        }
+
+        api.getPlaylists().enqueue(new retrofit2.Callback<SubsonicResponse>() {
+            @Override
+            public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    java.util.List<SubsonicResponse.Playlist> remotePlaylists =
+                        response.body().getResponse().getPlaylists().getPlaylist();
+
+                    // Log or Toast the number of playlists found
+                    Toast.makeText(ServerSettingsActivity.this, "Found " + remotePlaylists.size() + " playlists on server!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<SubsonicResponse> call, Throwable t) {
+                // Handle error
+            }
+        });
+    }
+
     private void checkUrlSecurity(String url) {
         if (url.toLowerCase().startsWith("http://")) {
             binding.tvHttpWarning.setVisibility(View.VISIBLE);
