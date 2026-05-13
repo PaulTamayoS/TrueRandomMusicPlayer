@@ -15,6 +15,8 @@ import com.games4science.truerandommusicplayer.databinding.ActivityServerSetting
 import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 
+import java.util.List;
+
 public class ServerSettingsActivity extends AppCompatActivity {
 
     private ActivityServerSettingsBinding binding;
@@ -136,17 +138,29 @@ public class ServerSettingsActivity extends AppCompatActivity {
             @Override
             public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    java.util.List<SubsonicResponse.Playlist> remotePlaylists =
-                        response.body().getResponse().getPlaylists().getPlaylist();
 
-                    // Log or Toast the number of playlists found
-                    Toast.makeText(ServerSettingsActivity.this, "Found " + remotePlaylists.size() + " playlists on server!", Toast.LENGTH_SHORT).show();
+                    SubsonicResponse.ResponseData data = response.body().getResponse();
+
+                    if (data.isOk()) {
+                        if (data.getPlaylists() != null && data.getPlaylists().getPlaylist() != null)
+                        {
+                            List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
+                            Toast.makeText(ServerSettingsActivity.this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_LONG).show();
+                        }
+                        else
+                        {
+                            Toast.makeText(ServerSettingsActivity.this, "Connected, but you have 0 playlists on the server.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
+                        Toast.makeText(ServerSettingsActivity.this, "Server Error: " + msg, Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<SubsonicResponse> call, Throwable t) {
-                // Handle error
+                Toast.makeText(ServerSettingsActivity.this, "Network Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
