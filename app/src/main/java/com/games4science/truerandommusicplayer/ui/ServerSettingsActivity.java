@@ -16,6 +16,7 @@ import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ServerSettingsActivity extends AppCompatActivity {
 
@@ -53,6 +54,13 @@ public class ServerSettingsActivity extends AppCompatActivity {
         checkUrlSecurity(url);
     }
 
+    private void checkUrlSecurity(String url) {
+        if (url.toLowerCase().startsWith("http://")) {
+            binding.tvHttpWarning.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvHttpWarning.setVisibility(View.GONE); }
+    }
+
     private void saveAndExit() {
         saveSettingsToPrefs();
         finish();
@@ -73,56 +81,45 @@ public class ServerSettingsActivity extends AppCompatActivity {
     }
 
     private void testConnection() {
-        String url = binding.editTextServerUrl.getText().toString().trim();
-        String user = binding.editTextUsername.getText().toString().trim();
-        String pass = binding.editTextPassword.getText().toString().trim();
+        SubsonicApi api = getValidatedApi();
 
-        if (url.isEmpty() || user.isEmpty() || pass.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Save current values to SharedPreferences first so the Interceptor can read them
-        saveSettingsToPrefs();
-
-        RetrofitClient.resetClient();
-        SubsonicApi api = RetrofitClient.getSubsonicApi(this);
         if (api == null) {
             return;
         }
 
-        // Make the call
-        api.ping().enqueue(new retrofit2.Callback<SubsonicResponse>() {
-                    @Override
-                    public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            SubsonicResponse.ResponseData data = response.body().getResponse();
-                            if (data.isOk()) {
-                                Toast.makeText(ServerSettingsActivity.this, "Connection Successful! Version: " + data.getVersion(), Toast.LENGTH_LONG).show();
-                            } else {
-                                String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
-                                Toast.makeText(ServerSettingsActivity.this, "Server Error: " + msg, Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Toast.makeText(ServerSettingsActivity.this, "HTTP Error: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(retrofit2.Call<SubsonicResponse> call, Throwable t) {
-                        Toast.makeText(ServerSettingsActivity.this, "Network Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+        executeRequest(api.ping(), data -> {
+            Toast.makeText(this, "Connection Successful! Version: " + data.getVersion(), Toast.LENGTH_LONG).show();
+        });
     }
 
     private void getPlaylists() {
+        SubsonicApi api = getValidatedApi();
+
+        if (api == null) {
+            return;
+        }
+
+        executeRequest(api.getPlaylists(), data -> {
+            if (data.getPlaylists() != null && data.getPlaylists().getPlaylist() != null)
+            {
+                List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
+                Toast.makeText(this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(this, "Connected, but you have 0 playlists on the server.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private SubsonicApi getValidatedApi() {
         String url = binding.editTextServerUrl.getText().toString().trim();
         String user = binding.editTextUsername.getText().toString().trim();
         String pass = binding.editTextPassword.getText().toString().trim();
 
         if (url.isEmpty() || user.isEmpty() || pass.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            return;
+            return null;
         }
 
         // Save current values to SharedPreferences first so the Interceptor can read them
@@ -130,11 +127,12 @@ public class ServerSettingsActivity extends AppCompatActivity {
 
         RetrofitClient.resetClient();
         SubsonicApi api = RetrofitClient.getSubsonicApi(this);
-        if (api == null) {
-            return;
-        }
 
-        api.getPlaylists().enqueue(new retrofit2.Callback<SubsonicResponse>() {
+        return api;
+    }
+
+    private void executeRequest(retrofit2.Call<SubsonicResponse> call, Consumer<SubsonicResponse.ResponseData> listener) {
+        call.enqueue(new retrofit2.Callback<SubsonicResponse>() {
             @Override
             public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -142,19 +140,13 @@ public class ServerSettingsActivity extends AppCompatActivity {
                     SubsonicResponse.ResponseData data = response.body().getResponse();
 
                     if (data.isOk()) {
-                        if (data.getPlaylists() != null && data.getPlaylists().getPlaylist() != null)
-                        {
-                            List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
-                            Toast.makeText(ServerSettingsActivity.this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_LONG).show();
-                        }
-                        else
-                        {
-                            Toast.makeText(ServerSettingsActivity.this, "Connected, but you have 0 playlists on the server.", Toast.LENGTH_LONG).show();
-                        }
+                        listener.accept(data);
                     } else {
                         String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
                         Toast.makeText(ServerSettingsActivity.this, "Server Error: " + msg, Toast.LENGTH_LONG).show();
                     }
+                } else {
+                    Toast.makeText(ServerSettingsActivity.this, "HTTP Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -163,12 +155,5 @@ public class ServerSettingsActivity extends AppCompatActivity {
                 Toast.makeText(ServerSettingsActivity.this, "Network Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void checkUrlSecurity(String url) {
-        if (url.toLowerCase().startsWith("http://")) {
-            binding.tvHttpWarning.setVisibility(View.VISIBLE);
-        } else {
-            binding.tvHttpWarning.setVisibility(View.GONE); }
     }
 }
