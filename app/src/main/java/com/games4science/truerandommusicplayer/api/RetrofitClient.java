@@ -27,7 +27,7 @@ public class RetrofitClient {
             String baseUrl = prefs.getString(MyConstants.PREFS_KEY_SERVER_URL, "");
 
             // Safety check: if no URL is set, we can't build the API
-            if (baseUrl.isEmpty()) {
+            if (baseUrl.isEmpty() || baseUrl.toLowerCase().startsWith("http") == false) {
                 return null;
             }
             // Ensure the URL ends with a slash / for Retrofit
@@ -35,45 +35,49 @@ public class RetrofitClient {
                 baseUrl += "/";
             }
 
-            // Create the Auth Interceptor
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .addInterceptor(chain -> {
-                        Request original = chain.request();
-                        HttpUrl originalHttpUrl = original.url();
+            try {
+                // Create the Auth Interceptor
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .readTimeout(30, TimeUnit.SECONDS)
+                        .addInterceptor(chain -> {
+                            Request original = chain.request();
+                            HttpUrl originalHttpUrl = original.url();
 
-                        // Retrieve current credentials from SharedPreferences
-                        String user = prefs.getString(MyConstants.PREFS_KEY_SERVER_USER, "");
-                        String pass = prefs.getString(MyConstants.PREFS_KEY_SERVER_PASSWORD, "");
+                            // Retrieve current credentials from SharedPreferences
+                            String user = prefs.getString(MyConstants.PREFS_KEY_SERVER_USER, "");
+                            String pass = prefs.getString(MyConstants.PREFS_KEY_SERVER_PASSWORD, "");
 
-                        String salt = String.valueOf(System.currentTimeMillis());
-                        String token = MyUtils.generateMd5Token(pass, salt);
+                            String salt = String.valueOf(System.currentTimeMillis());
+                            String token = MyUtils.generateMd5Token(pass, salt);
 
-                        // Build the new URL with all Subsonic requirements
-                        HttpUrl url = originalHttpUrl.newBuilder()
-                                .addQueryParameter("u", user)
-                                .addQueryParameter("t", token)
-                                .addQueryParameter("s", salt)
-                                .addQueryParameter("v", "1.16.1")
-                                .addQueryParameter("c", "TrueRandomMusicPlayer")
-                                .addQueryParameter("f", "json")
-                                .build();
+                            // Build the new URL with all Subsonic requirements
+                            HttpUrl url = originalHttpUrl.newBuilder()
+                                    .addQueryParameter("u", user)
+                                    .addQueryParameter("t", token)
+                                    .addQueryParameter("s", salt)
+                                    .addQueryParameter("v", "1.16.1")
+                                    .addQueryParameter("c", "TrueRandomMusicPlayer")
+                                    .addQueryParameter("f", "json")
+                                    .build();
 
-                        // Rebuild the request with the new URL
-                        Request request = original.newBuilder().url(url).build();
-                        return chain.proceed(request);
-                    })
-                    .build();
+                            // Rebuild the request with the new URL
+                            Request request = original.newBuilder().url(url).build();
+                            return chain.proceed(request);
+                        })
+                        .build();
 
-            // Build Retrofit using the OkHttpClient
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(baseUrl)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+                // Build Retrofit using the OkHttpClient
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(baseUrl)
+                        .client(client)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
 
-            subsonicApi = retrofit.create(SubsonicApi.class);
+                subsonicApi = retrofit.create(SubsonicApi.class);
+            } catch (Exception e) {
+                return null;
+            }
         }
         return subsonicApi;
     }
@@ -120,7 +124,7 @@ public class RetrofitClient {
         String salt = String.valueOf(System.currentTimeMillis());
         String token = MyUtils.generateMd5Token(pass, salt);
 
-        // Build the stream.view URL with all required auth parameters // TODO : see if can refacto with similar code in getSubsonicApi
+        // Build the stream.view URL with all required auth parameters
         return baseUrl + "rest/stream.view" +
                 "?id=" + songId +
                 "&u=" + user +
