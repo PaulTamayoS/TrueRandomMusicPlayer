@@ -109,8 +109,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
                 openFilePicker();
             } else if (item.getTitle().equals("Select Folder")) {
                 openFolderPicker();
-            }
-            else {
+            } else {
                 showImportSubsonicDialogGetAllPlaylists();
             }
             return true;

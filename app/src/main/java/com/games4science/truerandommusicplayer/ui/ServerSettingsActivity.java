@@ -79,15 +79,14 @@ public class ServerSettingsActivity extends AppCompatActivity {
     private void testConnection() {
         SubsonicApi api = getValidatedApi();
         if (api == null) {
+            Toast.makeText(this, "Can't create connection, please check URL ", Toast.LENGTH_SHORT).show();
             return;
         }
 
         RetrofitClient.executeRequest(this, api.ping(), data -> {
-            Toast.makeText(this, "Connection Successful! Version: " + data.getVersion(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Connection Successful! Version: " + data.getVersion(), Toast.LENGTH_SHORT).show();
         });
     }
-
-
 
     private SubsonicApi getValidatedApi() {
         String url = binding.editTextServerUrl.getText().toString().trim();
@@ -107,6 +106,4 @@ public class ServerSettingsActivity extends AppCompatActivity {
 
         return api;
     }
-
-
 }
