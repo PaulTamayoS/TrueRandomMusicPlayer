@@ -256,8 +256,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void triggerPlaylistLoad(String playlistName) {
-        Toast.makeText(MainActivity.this, "Changing Playlist to : " + playlistName, Toast.LENGTH_SHORT).show();
-
         // Save to disk so we remember even if the app process dies
         getSharedPreferences(MyConstants.PREFS_REPO_PLAYER, MODE_PRIVATE)
                 .edit()
