@@ -2,10 +2,14 @@ package com.games4science.truerandommusicplayer.api;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
+
+import com.games4science.truerandommusicplayer.ui.ServerSettingsActivity;
 import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -76,6 +80,32 @@ public class RetrofitClient {
 
     public static void resetClient() {
         subsonicApi = null;
+    }
+
+    public static void executeRequest(Context callingContext, retrofit2.Call<SubsonicResponse> call, Consumer<SubsonicResponse.ResponseData> listener) {
+        call.enqueue(new retrofit2.Callback<SubsonicResponse>() {
+            @Override
+            public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+
+                    SubsonicResponse.ResponseData data = response.body().getResponse();
+
+                    if (data.isOk()) {
+                        listener.accept(data);
+                    } else {
+                        String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
+                        Toast.makeText(callingContext, "Server Error: " + msg, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(callingContext, "HTTP Error: " + response.code(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<SubsonicResponse> call, Throwable t) {
+                Toast.makeText(callingContext, "Network Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public static String getStreamUrl(Context context, String songId) {

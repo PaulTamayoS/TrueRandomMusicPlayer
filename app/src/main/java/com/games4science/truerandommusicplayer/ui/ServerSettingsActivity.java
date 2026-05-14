@@ -13,10 +13,6 @@ import com.games4science.truerandommusicplayer.api.SubsonicApi;
 import com.games4science.truerandommusicplayer.api.SubsonicResponse;
 import com.games4science.truerandommusicplayer.databinding.ActivityServerSettingsBinding;
 import com.games4science.truerandommusicplayer.util.MyConstants;
-import com.games4science.truerandommusicplayer.util.MyUtils;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 public class ServerSettingsActivity extends AppCompatActivity {
 
@@ -87,28 +83,8 @@ public class ServerSettingsActivity extends AppCompatActivity {
             return;
         }
 
-        executeRequest(api.ping(), data -> {
+        RetrofitClient.executeRequest(this, api.ping(), data -> {
             Toast.makeText(this, "Connection Successful! Version: " + data.getVersion(), Toast.LENGTH_LONG).show();
-        });
-    }
-
-    private void getPlaylists() {
-        SubsonicApi api = getValidatedApi();
-
-        if (api == null) {
-            return;
-        }
-
-        executeRequest(api.getPlaylists(), data -> {
-            if (data.getPlaylists() != null && data.getPlaylists().getPlaylist() != null)
-            {
-                List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
-                Toast.makeText(this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                Toast.makeText(this, "Connected, but you have 0 playlists on the server.", Toast.LENGTH_LONG).show();
-            }
         });
     }
 
@@ -119,7 +95,7 @@ public class ServerSettingsActivity extends AppCompatActivity {
             return;
         }
 
-        executeRequest(api.getPlaylist(playlistId), data -> {
+        RetrofitClient.executeRequest(this, api.getPlaylist(playlistId), data -> {
             if (data.getPlaylist() != null && data.getPlaylist().getEntries() != null)
             {
                 java.util.List<SubsonicResponse.SongEntry> songs = data.getPlaylist().getEntries();
@@ -157,29 +133,5 @@ public class ServerSettingsActivity extends AppCompatActivity {
         return api;
     }
 
-    private void executeRequest(retrofit2.Call<SubsonicResponse> call, Consumer<SubsonicResponse.ResponseData> listener) {
-        call.enqueue(new retrofit2.Callback<SubsonicResponse>() {
-            @Override
-            public void onResponse(retrofit2.Call<SubsonicResponse> call, retrofit2.Response<SubsonicResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
 
-                    SubsonicResponse.ResponseData data = response.body().getResponse();
-
-                    if (data.isOk()) {
-                        listener.accept(data);
-                    } else {
-                        String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
-                        Toast.makeText(ServerSettingsActivity.this, "Server Error: " + msg, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(ServerSettingsActivity.this, "HTTP Error: " + response.code(), Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(retrofit2.Call<SubsonicResponse> call, Throwable t) {
-                Toast.makeText(ServerSettingsActivity.this, "Network Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
 }
