@@ -78,7 +78,6 @@ public class ServerSettingsActivity extends AppCompatActivity {
 
     private void testConnection() {
         SubsonicApi api = getValidatedApi();
-
         if (api == null) {
             return;
         }
@@ -88,31 +87,7 @@ public class ServerSettingsActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchTracks(String playlistId) {
-        SubsonicApi api = RetrofitClient.getSubsonicApi(this);
 
-        if (api == null) {
-            return;
-        }
-
-        RetrofitClient.executeRequest(this, api.getPlaylist(playlistId), data -> {
-            if (data.getPlaylist() != null && data.getPlaylist().getEntries() != null)
-            {
-                java.util.List<SubsonicResponse.SongEntry> songs = data.getPlaylist().getEntries();
-
-                for (SubsonicResponse.SongEntry song : songs) {
-                    // Now you have the song title, artist, and ID!
-                    android.util.Log.d("Subsonic", "Found song: " + song.getTitle());
-                }
-
-                Toast.makeText(this, "Fetched " + songs.size() + " songs!", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                Toast.makeText(this, "Playlist has 0 songs!!!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private SubsonicApi getValidatedApi() {
         String url = binding.editTextServerUrl.getText().toString().trim();

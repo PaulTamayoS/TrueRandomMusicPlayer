@@ -327,7 +327,7 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             {
                 List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
                 Toast.makeText(this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_SHORT).show();
-               // showPlaylistSelectionDialog(playlists);
+                showPlaylistSelectionDialog(remotePlaylists);
             }
             else
             {
@@ -336,7 +336,49 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         });
     }
 
+    private void showPlaylistSelectionDialog(List<SubsonicResponse.Playlist> playlists) {
+        String[] names = new String[playlists.size()];
+        for (int i = 0; i < playlists.size(); i++) {
+            names[i] = playlists.get(i).getName();
+        }
 
+        new AlertDialog.Builder(this)
+                .setTitle("Select Server Playlist")
+                .setItems(names, (dialog, which) -> {
+                    String selectedId = playlists.get(which).getId();
+                    importTracksFromRemote(selectedId);
+                })
+                .show();
+    }
+
+    private void importTracksFromRemote(String remotePlaylistId) {
+        SubsonicApi api = RetrofitClient.getSubsonicApi(this);
+        if (api == null) {
+            return;
+        }
+
+        RetrofitClient.executeRequest(this, api.getPlaylist(remotePlaylistId), data -> {
+            if (data.getPlaylist() != null && data.getPlaylist().getEntries() != null)
+            {
+                List<SubsonicResponse.SongEntry> songs = data.getPlaylist().getEntries();
+
+                TrackRepository.importSubsonicPlaylist(this, currentPlaylistId, songs, countAdded -> {
+                    runOnUiThread(() -> {
+                        if (countAdded > 0) {
+                            MainActivity.playlistModified = true;
+                            loadTracksIntoList();
+                            LoadOrReloadMusicService();
+                            Toast.makeText(ManagePlaylistsActivity.this, "Imported " + songs.size() + " tracks!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            }
+            else
+            {
+                Toast.makeText(this, "Playlist has 0 songs!!!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     //endregion
 }

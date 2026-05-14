@@ -237,24 +237,26 @@ public class TrackRepository {
         });
     }
 
-    public static void importSubsonicPlaylist(Context context, long localPlaylistId, List<SubsonicResponse.SongEntry> remoteSongs) {
+    public static void importSubsonicPlaylist(Context context, long localPlaylistId, List<SubsonicResponse.SongEntry> remoteSongs, RepositoryCallback<Integer> callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
             List<Track> tracksToInsert = new ArrayList<>();
             List<JoinPlaylistTrack> joins = new ArrayList<>();
 
-        for (SubsonicResponse.SongEntry entry : remoteSongs) {
-            // Create a URI starting with subsonic:// to identify it later
-            String specialUri = "subsonic://" + entry.getId();
+            for (SubsonicResponse.SongEntry entry : remoteSongs) {
+                // Create a URI starting with subsonic:// to identify it later
+                String specialUri = "subsonic://" + entry.getId();
 
-            Track track = new Track(entry.getTitle(), specialUri, entry.getArtist());
-            tracksToInsert.add(track);
+                Track track = new Track(entry.getTitle(), specialUri, entry.getArtist());
+                tracksToInsert.add(track);
 
-            joins.add(new JoinPlaylistTrack(localPlaylistId, specialUri));
-        }
+                joins.add(new JoinPlaylistTrack(localPlaylistId, specialUri));
+            }
 
-        dao.insertTracks(tracksToInsert);
-        dao.addTracksToPlaylist(joins);
+            dao.insertTracks(tracksToInsert);
+            dao.addTracksToPlaylist(joins);
+
+            callback.onComplete(joins.size());
     });
     }
 }
