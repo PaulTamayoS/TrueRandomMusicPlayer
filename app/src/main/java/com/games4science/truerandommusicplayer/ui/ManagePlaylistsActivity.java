@@ -14,6 +14,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.games4science.truerandommusicplayer.api.RetrofitClient;
+import com.games4science.truerandommusicplayer.api.SubsonicApi;
+import com.games4science.truerandommusicplayer.api.SubsonicResponse;
 import com.games4science.truerandommusicplayer.data.TrackRepository;
 import com.games4science.truerandommusicplayer.databinding.ActivityManagePlaylistsBinding;
 import com.games4science.truerandommusicplayer.model.Playlist;
@@ -24,6 +27,9 @@ import com.games4science.truerandommusicplayer.util.MyConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class ManagePlaylistsActivity extends AppCompatActivity {
 
@@ -96,12 +102,16 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
         androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, v);
         popup.getMenu().add("Select Files");
         popup.getMenu().add("Select Folder");
+        popup.getMenu().add("Import From Server");
 
         popup.setOnMenuItemClickListener(item -> {
             if (item.getTitle().equals("Select Files")) {
                 openFilePicker();
-            } else {
+            } else if (item.getTitle().equals("Select Folder")) {
                 openFolderPicker();
+            }
+            else {
+                showImportSubsonicDialogGetAllPlaylists();
             }
             return true;
         });
@@ -304,6 +314,29 @@ public class ManagePlaylistsActivity extends AppCompatActivity {
             });
         });
     }
+
+    private void showImportSubsonicDialogGetAllPlaylists() {
+        SubsonicApi api = RetrofitClient.getSubsonicApi(this);
+        if (api == null) {
+            Toast.makeText(this, "Configure server settings first!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        RetrofitClient.executeRequest(this, api.getPlaylists(), data -> {
+            if (data.getPlaylists() != null && data.getPlaylists().getPlaylist() != null)
+            {
+                List<SubsonicResponse.Playlist> remotePlaylists = data.getPlaylists().getPlaylist();
+                Toast.makeText(this, "Success! Found " + remotePlaylists.size() + " playlists.", Toast.LENGTH_SHORT).show();
+               // showPlaylistSelectionDialog(playlists);
+            }
+            else
+            {
+                Toast.makeText(this, "Connected, but you have 0 playlists on the server.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
 
     //endregion
 }
