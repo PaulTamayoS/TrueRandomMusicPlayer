@@ -94,11 +94,15 @@ public class RetrofitClient {
 
                     SubsonicResponse.ResponseData data = response.body().getResponse();
 
-                    if (data.isOk()) {
-                        listener.accept(data);
+                    if (data != null) {
+                        if (data.isOk()) {
+                            listener.accept(data);
+                        } else {
+                            String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
+                            Toast.makeText(callingContext, "Server Error: " + msg, Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        String msg = data.getError() != null ? data.getError().getMessage() : "Unknown Error";
-                        Toast.makeText(callingContext, "Server Error: " + msg, Toast.LENGTH_LONG).show();
+                        Toast.makeText(callingContext, "Unexpected Server Response", Toast.LENGTH_LONG).show();
                     }
                 } else {
                     Toast.makeText(callingContext, "HTTP Error: " + response.code(), Toast.LENGTH_LONG).show();
@@ -118,7 +122,10 @@ public class RetrofitClient {
         String user = prefs.getString(MyConstants.PREFS_KEY_SERVER_USER, "");
         String pass = prefs.getString(MyConstants.PREFS_KEY_SERVER_PASSWORD, "");
 
-        if (baseUrl.isEmpty() || songId == null) return null;
+        if (baseUrl.isEmpty() || baseUrl.toLowerCase().startsWith("http") == false || songId == null) {
+            return null;
+        }
+
         if (!baseUrl.endsWith("/")) baseUrl += "/";
 
         String salt = String.valueOf(System.currentTimeMillis());
