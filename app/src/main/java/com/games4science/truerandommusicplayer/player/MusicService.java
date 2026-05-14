@@ -121,9 +121,6 @@ public class MusicService extends MediaSessionService {
         TrackRepository.getTracksAsListMediaItems(this, playlistName, tracks -> {
             getMainExecutor().execute(() -> {
                 if (tracks == null || tracks.isEmpty()) {
-                    Toast.makeText(MusicService.this,
-                            "The playlist '" + playlistName + "' is empty!",
-                            Toast.LENGTH_SHORT).show();
                     player.stop();
                     player.clearMediaItems();
                     return;
