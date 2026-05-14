@@ -59,7 +59,6 @@ public class SubsonicResponse {
         public int getDuration() { return duration; }
     }
 
-
     public static class Error {
         private int code;
         private String message;

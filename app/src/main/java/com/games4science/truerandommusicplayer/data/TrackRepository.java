@@ -9,6 +9,8 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 
+import com.games4science.truerandommusicplayer.api.RetrofitClient;
+import com.games4science.truerandommusicplayer.api.SubsonicResponse;
 import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 import com.games4science.truerandommusicplayer.model.AppDatabase;
@@ -187,13 +189,24 @@ public class TrackRepository {
             List<MediaItem> mediaItems = new ArrayList<>();
 
             for (Track t : dbTracks) {
+                Uri playbackUri;
+
+                // check if subsonic track or local file
+                if (t.getUriString().startsWith("subsonic://")) {
+                    String songId = t.getUriString().replace("subsonic://", "");
+                    String fullUrl = RetrofitClient.getStreamUrl(context, songId);
+                    playbackUri = Uri.parse(fullUrl);
+                } else {
+                    playbackUri = t.getUri();
+                }
+
                 MediaMetadata metadata = new MediaMetadata.Builder()
                         .setTitle(t.getName())
                         .setArtist(t.getArtist())
                         .build();
 
                 mediaItems.add(new MediaItem.Builder()
-                        .setUri(t.getUri())
+                        .setUri(playbackUri)
                         .setMediaMetadata(metadata)
                         .build());
             }
@@ -222,5 +235,26 @@ public class TrackRepository {
             LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
             dao.removeOneInstance(playlistId, uriToRemove);
         });
+    }
+
+    public static void importSubsonicPlaylist(Context context, long localPlaylistId, List<SubsonicResponse.SongEntry> remoteSongs) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            LibraryDao dao = AppDatabase.getDatabase(context).libraryDao();
+            List<Track> tracksToInsert = new ArrayList<>();
+            List<JoinPlaylistTrack> joins = new ArrayList<>();
+
+        for (SubsonicResponse.SongEntry entry : remoteSongs) {
+            // Create a URI starting with subsonic:// to identify it later
+            String specialUri = "subsonic://" + entry.getId();
+
+            Track track = new Track(entry.getTitle(), specialUri, entry.getArtist());
+            tracksToInsert.add(track);
+
+            joins.add(new JoinPlaylistTrack(localPlaylistId, specialUri));
+        }
+
+        dao.insertTracks(tracksToInsert);
+        dao.addTracksToPlaylist(joins);
+    });
     }
 }

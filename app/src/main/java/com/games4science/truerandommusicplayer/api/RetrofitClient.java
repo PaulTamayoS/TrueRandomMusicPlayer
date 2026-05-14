@@ -77,4 +77,27 @@ public class RetrofitClient {
     public static void resetClient() {
         subsonicApi = null;
     }
+
+    public static String getStreamUrl(Context context, String songId) {
+        SharedPreferences prefs = context.getSharedPreferences(MyConstants.PREFS_SERVER_SETTINGS, Context.MODE_PRIVATE);
+        String baseUrl = prefs.getString(MyConstants.PREFS_KEY_SERVER_URL, "");
+        String user = prefs.getString(MyConstants.PREFS_KEY_SERVER_USER, "");
+        String pass = prefs.getString(MyConstants.PREFS_KEY_SERVER_PASSWORD, "");
+
+        if (baseUrl.isEmpty() || songId == null) return null;
+        if (!baseUrl.endsWith("/")) baseUrl += "/";
+
+        String salt = String.valueOf(System.currentTimeMillis());
+        String token = MyUtils.generateMd5Token(pass, salt);
+
+        // Build the stream.view URL with all required auth parameters // TODO : see if can refacto with similar code in getSubsonicApi
+        return baseUrl + "rest/stream.view" +
+                "?id=" + songId +
+                "&u=" + user +
+                "&t=" + token +
+                "&s=" + salt +
+                "&v=1.16.1" +
+                "&c=TrueRandomMusicPlayer" +
+                "&f=json";
+    }
 }
