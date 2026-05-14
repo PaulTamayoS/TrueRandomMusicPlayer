@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up the listener for the Playlist Editor button
         binding.btnPlaylistEditor.setOnClickListener(v -> actionHandler.OnClickBtnPlaylistEditor());
+        binding.btnServerSettings.setOnClickListener(v -> actionHandler.OnClickBtnServerSettings());
         binding.btnPlayPause.setOnClickListener(v -> actionHandler.OnClickBtnPlayPause());
         binding.btnNext.setOnClickListener(v -> actionHandler.OnClickBtnNext());
         binding.btnPrevious.setOnClickListener(v -> actionHandler.OnClickBtnPrevious());

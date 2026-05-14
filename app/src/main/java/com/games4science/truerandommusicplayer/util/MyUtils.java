@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class MyUtils {
 
@@ -42,5 +44,27 @@ public class MyUtils {
         }
 
         return fileName != null ? fileName.replace("%20", " ") : "Unknown Song";
+    }
+
+    public static String generateMd5Token(String password, String salt) {
+        try {
+            String plainText = password + salt;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(plainText.getBytes());
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : messageDigest) {
+                String h = Integer.toHexString(0xFF & b);
+                while (h.length() < 2) {
+                    h = "0" + h;
+                }
+                hexString.append(h);
+            }
+
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            return "";
+        }
     }
 }

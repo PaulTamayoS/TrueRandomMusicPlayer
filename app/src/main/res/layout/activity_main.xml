@@ -44,15 +44,23 @@
             android:spinnerMode="dropdown" />
     </LinearLayout>
 
-      <com.google.android.material.button.MaterialButton
-          android:id="@+id/btnPlaylistEditor"
-          style="@style/Widget.Material3.Button.TonalButton"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="Playlist Editor"
-          app:icon="@android:drawable/ic_menu_edit"
-          android:layout_marginTop="8dp"
-          android:layout_marginBottom="24dp"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPlaylistEditor"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Playlist Editor"
+        app:icon="@android:drawable/ic_menu_edit"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="15dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnServerSettings"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server Settings"
+        app:icon="@android:drawable/ic_menu_preferences" />
 
     <TextView
         android:id="@+id/txtTrackTitle"
@@ -159,7 +167,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="26dp"
         android:layout_marginBottom="10dp"
-        android:text="True Random Madness!!!!"
+        android:text="True Random Mode!!!"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         android:scaleX="1.3"
         android:scaleY="1.3"

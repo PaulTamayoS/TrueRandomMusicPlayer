@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Foreground service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" tools:targetApi="34" /> <!-- Required for media playback foreground services (Android 14+) -->
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Keeps CPU awake during playback -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- External Server API calls need Internet access -->
     <!-- ========================= -->
     <!--        APPLICATION        -->
     <!-- ========================= -->
@@ -20,7 +21,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TrueRandomMusicPlayer">
+        android:theme="@style/Theme.TrueRandomMusicPlayer"
+        android:networkSecurityConfig="@xml/network_security_config">
         <!-- ========================= -->
         <!--        MAIN ACTIVITY      -->
         <!-- ========================= -->
@@ -38,6 +40,14 @@
         <activity
             android:name=".ui.ManagePlaylistsActivity"
             android:label="Playlist Editor"
+            android:parentActivityName=".ui.MainActivity"
+            android:exported="false" />
+        <!-- ========================= -->
+        <!--  SERVER SETTINGS ACTIVITY -->
+        <!-- ========================= -->
+        <activity
+            android:name=".ui.ServerSettingsActivity"
+            android:label="Server Settings"
             android:parentActivityName=".ui.MainActivity"
             android:exported="false" />
         <!-- ========================= -->
