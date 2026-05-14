@@ -22,21 +22,36 @@
 
 
 
-# 1. Media3 / ExoPlayer core rules
+# Media3 / ExoPlayer core rules
 -keep class androidx.media3.common.** { *; }
 -keep class androidx.media3.exoplayer.** { *; }
 -keep class androidx.media3.session.** { *; }
 
-# 2. Prevent R8 from stripping the "Binder" methods for the MusicService
+# Prevent R8 from stripping the "Binder" methods for the MusicService
 # This ensures your Activity can always connect to the MediaSession
 -keepclassmembers class * extends androidx.media3.session.MediaSessionService {
     public <init>();
 }
 
-# 3. Preserve your Repository and Data keys
+# Preserve your Repository and Data keys
 # Since you use JSON strings (like "uri", "title"), we want to make sure
 # the underlying reflection used by some libraries doesn't break.
 -keepattributes Signature, *Annotation*, EnclosingMethod
 
-# 4. (Optional but Recommended) Keep line numbers for Play Store crash reports
+# Keep line numbers for Play Store crash reports
 -keepattributes SourceFile, LineNumberTable
+
+# Keep your API models so GSON can find the field names
+-keep class com.games4science.truerandommusicplayer.api.** { *; }
+
+# Keep Retrofit and OkHttp internal logic
+-keepattributes Signature, InnerClasses, AnnotationDefault
+-keepattributes *Annotation*
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+
+# Ensure the SubsonicApi interface is not stripped or renamed
+-keep interface com.games4science.truerandommusicplayer.api.SubsonicApi { *; }
+
+# keep GSON classes
+-keep class com.google.gson.** { *; }
