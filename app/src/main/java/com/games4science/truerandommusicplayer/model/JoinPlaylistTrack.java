@@ -1,10 +1,12 @@
 package com.games4science.truerandommusicplayer.model;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+@Keep
 @Entity(
         tableName = "join_playlist_track",
         foreignKeys = {

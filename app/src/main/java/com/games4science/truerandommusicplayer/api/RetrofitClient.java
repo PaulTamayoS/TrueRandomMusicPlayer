@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
-import com.games4science.truerandommusicplayer.ui.ServerSettingsActivity;
+import androidx.annotation.Keep;
+
 import com.games4science.truerandommusicplayer.util.MyConstants;
 import com.games4science.truerandommusicplayer.util.MyUtils;
 
@@ -17,6 +18,7 @@ import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+@Keep
 public class RetrofitClient {
 
     private static SubsonicApi subsonicApi;
@@ -76,6 +78,7 @@ public class RetrofitClient {
 
                 subsonicApi = retrofit.create(SubsonicApi.class);
             } catch (Exception e) {
+                Toast.makeText(context, "Exception:" + e  , Toast.LENGTH_SHORT).show();
                 return null;
             }
         }

@@ -1,9 +1,11 @@
 package com.games4science.truerandommusicplayer.model;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+@Keep
 @Entity(tableName = "tracks")
 public class Track {
 

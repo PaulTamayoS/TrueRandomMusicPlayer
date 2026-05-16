@@ -1,7 +1,10 @@
 package com.games4science.truerandommusicplayer.api;
 
+import androidx.annotation.Keep;
+
 import com.google.gson.annotations.SerializedName;
 
+@Keep
 public class SubsonicResponse {
 
     @SerializedName("subsonic-response")
@@ -11,6 +14,7 @@ public class SubsonicResponse {
         return response;
     }
 
+    @Keep
     public static class ResponseData {
         private String status; // "ok" or "failed"
         private String version;
@@ -27,6 +31,7 @@ public class SubsonicResponse {
         public Playlist getPlaylist() { return playlist; }
     }
 
+    @Keep
     public static class PlaylistList {
         @SerializedName("playlist")
         private java.util.List<Playlist> playlist;
@@ -34,6 +39,7 @@ public class SubsonicResponse {
         public java.util.List<Playlist> getPlaylist() { return playlist; }
     }
 
+    @Keep
     public static class Playlist {
         private String id;
         private String name;
@@ -47,6 +53,7 @@ public class SubsonicResponse {
         public java.util.List<SongEntry> getEntries() { return entries; }
     }
 
+    @Keep
     public static class SongEntry {
         private String id;
         private String title;
@@ -59,6 +66,7 @@ public class SubsonicResponse {
         public int getDuration() { return duration; }
     }
 
+    @Keep
     public static class Error {
         private int code;
         private String message;
