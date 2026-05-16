@@ -12,15 +12,12 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep line numbers for Play Store crash reports
+-keepattributes SourceFile, LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
-
 
 # Media3 / ExoPlayer core rules
 -keep class androidx.media3.common.** { *; }
@@ -33,25 +30,16 @@
     public <init>();
 }
 
-# Preserve your Repository and Data keys
-# Since you use JSON strings (like "uri", "title"), we want to make sure
-# the underlying reflection used by some libraries doesn't break.
--keepattributes Signature, *Annotation*, EnclosingMethod
-
-# Keep line numbers for Play Store crash reports
--keepattributes SourceFile, LineNumberTable
-
-# Keep your API models so GSON can find the field names
--keep class com.games4science.truerandommusicplayer.api.** { *; }
-
 # Keep Retrofit and OkHttp internal logic
--keepattributes Signature, InnerClasses, AnnotationDefault
--keepattributes *Annotation*
--dontwarn okio.**
--dontwarn javax.annotation.**
+-keepattributes Signature, InnerClasses, EnclosingMethod, *Annotation*
+-keep class com.games4science.truerandommusicplayer.api.** { *; }
+-keep interface com.games4science.truerandommusicplayer.api.** { *; }
 
-# Ensure the SubsonicApi interface is not stripped or renamed
--keep interface com.games4science.truerandommusicplayer.api.SubsonicApi { *; }
+# Retrofit specific rules
+-keep class retrofit2.** { *; }
+-keep interface retrofit2.** { *; }
+-dontwarn retrofit2.**
 
-# keep GSON classes
+# GSON specific rules
 -keep class com.google.gson.** { *; }
+-dontwarn com.google.gson.**
