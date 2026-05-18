@@ -24,7 +24,4 @@ public class MyConstants {
     public static final String EXTRA_PLAYLIST_NAME_TO_EDIT = PACKAGE + "EXTRA_PLAYLIST_NAME_TO_EDIT";
     public static final String EXTRA_PLAYLIST_NAME = PACKAGE + "EXTRA_PLAYLIST_NAME";
     public static final String EXTRA_STATE_TOGGLE_TRUE_RANDOM = PACKAGE + "STATE_TOGGLE_TRUE_RANDOM";
-
-
-
 }

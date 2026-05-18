@@ -9,8 +9,6 @@ import java.util.concurrent.Executors;
 
 import com.games4science.truerandommusicplayer.util.MyConstants;
 
-import java.util.concurrent.ExecutorService;
-
 // We list all 3 entities and set the version to 1
 @Database(entities = {Track.class, Playlist.class, JoinPlaylistTrack.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {

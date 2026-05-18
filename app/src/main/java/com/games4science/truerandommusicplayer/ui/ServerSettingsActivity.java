@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.games4science.truerandommusicplayer.api.RetrofitClient;
 import com.games4science.truerandommusicplayer.api.SubsonicApi;
-import com.games4science.truerandommusicplayer.api.SubsonicResponse;
 import com.games4science.truerandommusicplayer.databinding.ActivityServerSettingsBinding;
 import com.games4science.truerandommusicplayer.util.MyConstants;
 
